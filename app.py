@@ -28,7 +28,7 @@ def run():
         # load config
         load_config()
         # ctrl + c
-        sigterm_handler_wrap(signal.SIGINT)
+        #sigterm_handler_wrap(signal.SIGINT)
         # kill signal
         sigterm_handler_wrap(signal.SIGTERM)
 

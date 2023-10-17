@@ -11,6 +11,6 @@ fi
 
 echo "The chatgpt-on-wechat(${pid}) is running..."
 
-kill ${pid}
+kill -9 ${pid}
 
 echo "Send shutdown request to chatgpt-on-wechat(${pid}) OK"
