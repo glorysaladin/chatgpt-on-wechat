@@ -128,7 +128,7 @@ def get_movie_update(last_post_id):
         message_list.append("{}: {}\n链接: {}".format(idx, movie, link))
         idx += 1
 
-    message_list.append("【群福利】\n夸克网盘SVIP会员(12元)\nhttps://sourl.cn/vAxErZ \n联系群主.")
+    message_list.append("全部资源链接:\n https://sourl.cn/XeN2ex\n夸克网盘SVIP会员(12元)\nhttps://sourl.cn/vAxErZ \n联系群主.")
 
     if len(movie_list) == 0:
         print("no update film.")

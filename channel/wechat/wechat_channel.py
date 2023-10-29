@@ -188,13 +188,13 @@ class WechatChannel(ChatChannel):
         receiver = context["receiver"]
         if reply.type == ReplyType.TEXT:
             itchat.send(reply.content, toUserName=receiver)
-            logger.info("[WX] sendMsg={}, receiver={}".format(reply, receiver))
+            logger.info("[WX] sendMsg={}, receiver={}, nick_name={}".format(reply, receiver, context["msg"].from_user_nickname))
         elif reply.type == ReplyType.ERROR or reply.type == ReplyType.INFO:
             itchat.send(reply.content, toUserName=receiver)
-            logger.info("[WX] sendMsg={}, receiver={}".format(reply, receiver))
+            logger.info("[WX] sendMsg={}, receiver={}, nick_name={}".format(reply, receiver, context["msg"].from_user_nickname))
         elif reply.type == ReplyType.VOICE:
             itchat.send_file(reply.content, toUserName=receiver)
-            logger.info("[WX] sendFile={}, receiver={}".format(reply.content, receiver))
+            logger.info("[WX] sendFile={}, receiver={}, nick_name={}".format(reply.content, receiver, context["msg"].from_user_nickname))
         elif reply.type == ReplyType.IMAGE_URL:  # 从网络下载图片
             img_url = reply.content
             logger.debug(f"[WX] start download image, img_url={img_url}")
@@ -212,15 +212,15 @@ class WechatChannel(ChatChannel):
             image_storage = reply.content
             image_storage.seek(0)
             itchat.send_image(image_storage, toUserName=receiver)
-            logger.info("[WX] sendImage, receiver={}".format(receiver))
+            logger.info("[WX] sendImage, receiver={}, nick_name={}".format(receiver, context["msg"].from_user_nickname))
         elif reply.type == ReplyType.FILE:  # 新增文件回复类型
             file_storage = reply.content
             itchat.send_file(file_storage, toUserName=receiver)
-            logger.info("[WX] sendFile, receiver={}".format(receiver))
+            logger.info("[WX] sendFile, receiver={}, nick_name={}".format(receiver, context["msg"].from_user_nickname))
         elif reply.type == ReplyType.VIDEO:  # 新增视频回复类型
             video_storage = reply.content
             itchat.send_video(video_storage, toUserName=receiver)
-            logger.info("[WX] sendFile, receiver={}".format(receiver))
+            logger.info("[WX] sendFile, receiver={}, nick_name={}".format(receiver, context["msg"].from_user_nickname))
         elif reply.type == ReplyType.VIDEO_URL:  # 新增视频URL回复类型
             video_url = reply.content
             logger.debug(f"[WX] start download video, video_url={video_url}")
@@ -233,4 +233,4 @@ class WechatChannel(ChatChannel):
             logger.info(f"[WX] download video success, size={size}, video_url={video_url}")
             video_storage.seek(0)
             itchat.send_video(video_storage, toUserName=receiver)
-            logger.info("[WX] sendVideo url={}, receiver={}".format(video_url, receiver))
+            logger.info("[WX] sendVideo url={}, receiver={}, nick_name={}".format(video_url, receiver, context["msg"].from_user_nickname))
