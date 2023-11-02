@@ -136,4 +136,45 @@ def get_movie_update(last_post_id):
 
     message = "\n".join(message_list)
     return (max_post_id, message)
+
+def _get_search_result(httpDoc, moviename, pattern='json'):
+    soup = None
+    try:
+        soup = BeautifulSoup(httpDoc, 'html5lib')
+    except:
+        soup = BeautifulSoup(httpDoc, 'html.parser')
+    htmlNode = soup.html
+    bodyNode = htmlNode.body
+    listNode = bodyNode.find('div', attrs={"class":"sou-con-list"})
+    aNodes = listNode.find_all('a')
+    rets = []
+    for item in aNodes:
+        href = ""
+        title = ""
+        if item.has_key("title") and item.has_key('href'):
+             href = item['href']
+             title = item['title'].replace("<strong>", "").replace("</strong>", "")
+        if moviename in title:
+             movieurl = href
+             link = get_source_link(href)
+             if link.strip() == "":
+                 link = href.split("url=")[1].split("&")[0]
+             rets.append("{}\n{}".format(title, link))
+    if len(rets) == 0:
+        return "未找到资源，可尝试缩短关键词，或者联系群主查找"
+    if len(rets) >= 10:
+       num = len(rets)
+       rets = rets[0:10]
+       rets.insert(0, "找到 {} 个资源, 展示前10个:\n".format(num))
+
+    if len(rets) < 10:
+       rets.insert(0, "找到 {} 个资源:\n".format(len(rets)))
+    return "\n".join(rets)
+
+def search_movie(web_url, movie):
+    url="{}/search.php?q={}".format(web_url, movie)
+    resp = requests.get(url)
+    return _get_search_result(resp.text, movie)
+
 #print(get_movie_update(1414))
+#print(search_movie("https://affdz.com", "三"))
