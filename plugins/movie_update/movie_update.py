@@ -43,10 +43,10 @@ class MovieUpdate(Plugin):
             conf["post_id"] = last_post_id
             super().save_config(conf)
             e_context.action = EventAction.BREAK_PASS
-        if content.startswith("看"):
+        if content.startswith("找"):
             conf = super().load_config()
             weburl= conf["web_url"]
-            moviename=content.strip().replace("看","")
+            moviename=content.strip().replace("找","")
             msg = search_movie(weburl, moviename)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
@@ -57,5 +57,5 @@ class MovieUpdate(Plugin):
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
-        help_text += "输入 '看三体'， 将获取三体资源\n"
+        help_text += "输入 '找三体'， 将获取三体资源\n"
         return help_text

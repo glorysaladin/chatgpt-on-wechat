@@ -7,6 +7,7 @@ import logging.handlers
 import traceback
 import urllib
 import requests
+from .get_pan_from_qianfan import *
 
 def download(url):
     resp = requests.get(url)
@@ -161,7 +162,9 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
                  link = href.split("url=")[1].split("&")[0]
              rets.append("{}\n{}".format(title, link))
     if len(rets) == 0:
-        return "未找到资源，可尝试缩短关键词，或者联系群主查找"
+        rets = get_from_qianfan(moviename)
+        if len(rets) == 0:
+            return "未找到资源，可尝试缩短关键词，或者联系群主查找"
     if len(rets) >= 10:
        num = len(rets)
        rets = rets[0:10]
