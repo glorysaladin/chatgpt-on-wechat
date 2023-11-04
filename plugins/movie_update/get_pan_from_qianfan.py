@@ -49,6 +49,7 @@ def _extract_movie_url(req_url, query):
         title=title_node.text
         info_node = bodyNode.find("div", attrs={"class":"item-detail-info"})
         url_node = info_node.find("div", attrs={"class":"copy-url pan-url btn-full btn"})
+        pwd_node = info_node.find("div", attrs={"class":"copy-pwd btn-line btn"})
         url = ""
         # 解析url
         try:
@@ -56,6 +57,9 @@ def _extract_movie_url(req_url, query):
                 data_url = url_node["data-url"]
                 ids = url_node["id"]
                 url = load_url(data_url, ids)
+            if pwd_node is not None and pwd_node.has_key("data-pwd"):
+                data_pwd=pwd_node["data-pwd"]
+                url="{}?pwd={}".format(url, data_pwd)
         except:
             print(traceback.format_exc())
         # 解析网盘

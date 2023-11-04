@@ -47,6 +47,7 @@ class MovieUpdate(Plugin):
             conf = super().load_config()
             weburl= conf["web_url"]
             moviename=content.strip().replace("找","")
+            moviename=moviename.replace("电影", "").replace("电视剧", "").replace("韩剧", "").replace("完整版", "").replace("未删减版", "").replace("未删减","")
             msg = search_movie(weburl, moviename)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
