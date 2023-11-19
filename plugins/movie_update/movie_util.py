@@ -138,6 +138,14 @@ def get_movie_update(last_post_id):
     message = "\n".join(message_list)
     return (max_post_id, message)
 
+def good_match(s1, s2):
+    set1 = set(s1)
+    set2 = set(s2)
+    common_chars = set1.intersection(set2)
+    if len(common_chars)*1.0  / (len(set1) + 0.1) > 0.2:
+       return True 
+    return False
+
 def _get_search_result(httpDoc, moviename, pattern='json'):
     soup = None
     try:
@@ -155,7 +163,8 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
         if item.has_key("title") and item.has_key('href'):
              href = item['href']
              title = item['title'].replace("<strong>", "").replace("</strong>", "")
-        if moviename in title:
+        if good_match(moviename, title):
+        #if moviename in title:
              movieurl = href
              link = get_source_link(href)
              if link.strip() == "":
@@ -164,15 +173,15 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
     if len(rets) == 0:
         rets = get_from_qianfan(moviename)
         if len(rets) == 0:
-            return "未找到资源，可尝试缩短关键词，或者联系群主查找"
-    if len(rets) >= 10:
+            return False, "未找到资源，可尝试缩短关键词，或者联系群主查找"
+    if len(rets) >= 5:
        num = len(rets)
-       rets = rets[0:10]
-       rets.insert(0, "找到 {} 个资源, 展示前10个:\n".format(num))
+       rets = rets[0:5]
+       rets.insert(0, "找到 {} 个资源, 展示前5个:\n".format(num))
 
-    if len(rets) < 10:
+    if len(rets) < 5:
        rets.insert(0, "找到 {} 个资源:\n".format(len(rets)))
-    return "\n".join(rets)
+    return True, "\n".join(rets)
 
 def search_movie(web_url, movie):
     url="{}/search.php?q={}".format(web_url, movie)
@@ -180,4 +189,5 @@ def search_movie(web_url, movie):
     return _get_search_result(resp.text, movie)
 
 #print(get_movie_update(1414))
-#print(search_movie("https://affdz.com", "三"))
+#if __name__ == "__main__":
+#    print(search_movie("https://affdz.com", "天官赐福第二季"))

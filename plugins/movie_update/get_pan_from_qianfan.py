@@ -12,9 +12,16 @@ import requests
 import base64
 import re
 
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36 OPR/66.0.3515.115'}
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+           'Cookie': '_ga=GA1.1.1848973529.1699031414; csrftoken=O8GCr9HvXNKWAK81g6tHviB6IluKJ9faQ9j0wWC7mW8akQngXM1JAVgLUTffHzuf; QianFanID=hnojc2hlefnixsyraa8rcqyfvj7wxscd; _ga_6Z94VT54DV=GS1.1.1700361982.6.1.1700362098.0.0.0'
+}
+
+headers_movie = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.2 Safari/605.1.15',
+           'Cookie': '_ga=GA1.1.2070055861.1700363162; _ga_6Z94VT54DV=GS1.1.1700363161.1.1.1700363488.0.0.0; csrftoken=6HYo7MsZmMX2X16fdEdSnKwJ2pCG2inblkdVyADS3kgS53KzbbFuAQAMwIXNyXBT; QianFanID=faeq2621j9l766ba4pxayr6d2hzicvek'
+}
+
 session = requests.Session()
-ROOT_URL="https://pan.qianfan.app/"
+ROOT_URL="https://pan.qianfan.app"
 
 def load_url(d, e):
     for b in e:
@@ -29,13 +36,14 @@ def good_match(s1, s2):
     set1 = set(s1)
     set2 = set(s2)
     common_chars = set1.intersection(set2)
-    if len(common_chars)*1.0  / (len(set1) + 0.1) > 0.2:
+    if len(common_chars)*1.0  / (len(set1) + 0.1) > 0.3:
        return True 
     return False
 
 def _extract_movie_url(req_url, query):
+    #print(req_url, query)
     try :
-        resp = session.get(req_url, headers = headers)  ##  此处输入的url是登录后的豆瓣网页链接
+        resp = session.get(req_url, headers = headers_movie)  ##  此处输入的url是登录后的豆瓣网页链接
         httpDoc = resp.text
         soup = None
         try:
@@ -99,7 +107,7 @@ def _extract_page(req_url):
         item_nodes = bodyNode.find_all("div", attrs={"class":"search-item"})
         for item_node in item_nodes:
             url_node = item_node.find("a")
-            movie_page_url = "{}/{}".format(ROOT_URL, url_node["href"])
+            movie_page_url = "{}{}/".format(ROOT_URL, url_node["href"])
             urls.append(movie_page_url)
             img_node = item_node.find("img")
             title = img_node.text
@@ -138,3 +146,6 @@ def get_from_qianfan(query):
           final_rets.append(ret)
     return final_rets
 #print(get_from_qianfan("法医秦明夸克"))
+#movie_url='https://pan.qianfan.app/share/eyJtb2RlbCI6ImFsaXl1bmRyaXZlaW5mbyIsImlkIjoyNDUyODR9:omcB1Y52cd76ANQ3RGq8TkBXtKOlBKQQOyVWfWhNZT4'
+#query="法医秦明"
+#print(_extract_movie_url(movie_url, query))
