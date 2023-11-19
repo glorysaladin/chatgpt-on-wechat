@@ -7,15 +7,14 @@ import requests
 
 from bot.bot import Bot
 from bot.chatgpt.chat_gpt_session import ChatGPTSession
-from bot.openai.open_ai_image import OpenAIImage
 from bot.session_manager import SessionManager
 from bridge.context import Context, ContextType
 from bridge.reply import Reply, ReplyType
 from common.log import logger
 from config import conf, pconf
+import threading
 
-
-class LinkAIBot(Bot, OpenAIImage):
+class LinkAIBot(Bot):
     # authentication failed
     AUTH_FAILED_CODE = 401
     NO_QUOTA_CODE = 406
@@ -47,10 +46,10 @@ class LinkAIBot(Bot, OpenAIImage):
         :param retry_count: 当前递归重试次数
         :return: 回复
         """
-        if retry_count >= 2:
+        if retry_count > 2:
             # exit from retry 2 times
             logger.warn("[LINKAI] failed after maximum number of retry times")
-            return Reply(ReplyType.ERROR, "请再问我一次吧")
+            return Reply(ReplyType.TEXT, "请再问我一次吧")
 
         try:
             # load config
@@ -64,7 +63,7 @@ class LinkAIBot(Bot, OpenAIImage):
             session_id = context["session_id"]
 
             session = self.sessions.session_query(query, session_id)
-            model = conf().get("model") or "gpt-3.5-turbo"
+            model = conf().get("model")
             # remove system message
             if session.messages[0].get("role") == "system":
                 if app_code or model == "wenxin":
@@ -104,6 +103,10 @@ class LinkAIBot(Bot, OpenAIImage):
                     knowledge_suffix = self._fetch_knowledge_search_suffix(response)
                     if knowledge_suffix:
                         reply_content += knowledge_suffix
+                # image process
+                if response["choices"][0].get("img_urls"):
+                    thread = threading.Thread(target=self._send_image, args=(context.get("channel"), context, response["choices"][0].get("img_urls")))
+                    thread.start()
                 return Reply(ReplyType.TEXT, reply_content)
 
             else:
@@ -118,7 +121,7 @@ class LinkAIBot(Bot, OpenAIImage):
                     logger.warn(f"[LINKAI] do retry, times={retry_count}")
                     return self._chat(query, context, retry_count + 1)
 
-                return Reply(ReplyType.ERROR, "提问太快啦，请休息一下再问我吧")
+                return Reply(ReplyType.TEXT, "提问太快啦，请休息一下再问我吧")
 
         except Exception as e:
             logger.exception(e)
@@ -193,6 +196,32 @@ class LinkAIBot(Bot, OpenAIImage):
             return self.reply_text(session, app_code, retry_count + 1)
 
 
+    def create_img(self, query, retry_count=0, api_key=None):
+        try:
+            logger.info("[LinkImage] image_query={}".format(query))
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {conf().get('linkai_api_key')}"
+            }
+            data = {
+                "prompt": query,
+                "n": 1,
+                "model": conf().get("text_to_image") or "dall-e-2",
+                "response_format": "url",
+                "img_proxy": conf().get("image_proxy")
+            }
+            url = conf().get("linkai_api_base", "https://api.link-ai.chat") + "/v1/images/generations"
+            res = requests.post(url, headers=headers, json=data, timeout=(5, 90))
+            t2 = time.time()
+            image_url = res.json()["data"][0]["url"]
+            logger.info("[OPEN_AI] image_url={}".format(image_url))
+            return True, image_url
+
+        except Exception as e:
+            logger.error(format(e))
+            return False, "画图出现问题，请休息一下再问我吧"
+
+
     def _fetch_knowledge_search_suffix(self, response) -> str:
         try:
             if response.get("knowledge_base"):
@@ -236,3 +265,14 @@ class LinkAIBot(Bot, OpenAIImage):
                 return suffix
         except Exception as e:
             logger.exception(e)
+
+
+    def _send_image(self, channel, context, image_urls):
+        if not image_urls:
+            return
+        try:
+            for url in image_urls:
+                reply = Reply(ReplyType.IMAGE_URL, url)
+                channel.send(reply, context)
+        except Exception as e:
+            logger.error(e)
