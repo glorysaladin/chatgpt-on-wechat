@@ -8,6 +8,7 @@ from bridge.reply import Reply, ReplyType
 from plugins import *
 from .movie_util import *
 import traceback
+from common.log import logger
 
 
 @plugins.register(
@@ -27,10 +28,10 @@ class MovieUpdate(Plugin):
             curdir = os.path.dirname(__file__)
             ads_path = os.path.join(curdir, "ads.txt")
             self.ads_content = self.load_ads(ads_path)
-            print("[movie_update] ads_content={}".format(self.ads_content))
-            print("[movie_update] inited")
+            logger.info("[movie_update] ads_content={}".format(self.ads_content))
+            logger.info("[movie_update] inited")
         except:
-            print("[movie_update] inited failed.", traceback.format_exc())
+            logger.error("[movie_update] inited failed.", traceback.format_exc())
             raise self.handle_error(e, "[movie_update] init failed, ignore ")
 
     def on_handle_context(self, e_context: EventContext):

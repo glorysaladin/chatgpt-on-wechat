@@ -197,7 +197,7 @@ class WechatChannel(ChatChannel):
             logger.info("[WX] sendFile={}, receiver={}, nick_name={}".format(reply.content, receiver, context["msg"].from_user_nickname))
         elif reply.type == ReplyType.IMAGE_URL:  # 从网络下载图片
             img_url = reply.content
-            logger.debug(f"[WX] start download image, img_url={img_url}")
+            logger.info(f"[WX] start download image, img_url={img_url}")
             pic_res = requests.get(img_url, stream=True)
             image_storage = io.BytesIO()
             size = 0
