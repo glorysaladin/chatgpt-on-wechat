@@ -11,13 +11,12 @@ import urllib
 import requests
 import base64
 import re
+import random
 
+#all_cookies=['_ga=GA1.1.1848973529.1699031414; csrftoken=0lHZKoZjyLt3oBkJGNiepOr2oRaFocOWTyEQbVzdnS3UxaqEVOgg38LKuPNqMS6p; QianFanID=xgd2; _ga_6Z94VT54DV=GS1.1.1700844413.9.1.1700844607.0.0.0', '_ga=GA1.1.1848973529.1699031414; csrftoken=bfgLDv2UpMSsbTGa85cA25NYfbDArddtw0ZWSZkS01RoVWIyvs7CBhJpjoOnF7EJ; QianFanID=4sb6w632ofrl62wvosusapn61ycmnf69; _ga_6Z94VT54DV=GS1.1.1700841234.8.1.1700841507.0.0.0', '_ga=GA1.1.1522275278.1700845007; csrftoken=9mebBoab0hFSFTduSIuZfW8F6fwxuC4TNxVr74bxS113AyFIDIPrAd2JjCehwRjb; QianFanID=o7k5iirbby1wv4g0bt3ulgzlhdqkh9lr; _ga_6Z94VT54DV=GS1.1.1700845006.1.1.1700845076.0.0.0', '_ga=GA1.1.1928122655.1700845204; csrftoken=M8RvCPGuBfkyrFNhnfiuBYIN9VvBmkZ58YOS5nhj9v4iaZ8j8CbVkXHvB64da9uY; QianFanID=qj84nfiurq20siw7rklk8jotgtrs49oa; _ga_6Z94VT54DV=GS1.1.1700845204.1.1.1700845392.0.0.0', '_ga=GA1.1.617151142.1700845705; csrftoken=DjbuhsaiHvP003FQGYrJ8PpO7FOWx7tpDaScNNgSZPbFOtD0SqVffKD0Jf7TWevp; QianFanID=9xdis; _ga_6Z94VT54DV=GS1.1.1700845704.1.1.1700845758.0.0.0', '_ga=GA1.1.1920616457.1700845863; _ga_6Z94VT54DV=GS1.1.1700845863.1.0.1700845863.0.0.0; csrftoken=6Ldx0ATalNQ2mch3Pa3SelB2t8nRdRHs9Je5cZPoNWZN9u5JZe1qiE5tyWZIRxAv; QianFanID=jto7fmw7peb92sltfardk8ak3zjlwlfs']
+all_cookies=['_ga=GA1.1.617151142.1700845705; csrftoken=DjbuhsaiHvP003FQGYrJ8PpO7FOWx7tpDaScNNgSZPbFOtD0SqVffKD0Jf7TWevp; QianFanID=9xdisalghv3amslxrpfieag46qd7mp58; _ga_6Z94VT54DV=GS1.1.1700845704.1.1.1700845758.0.0.0', '_ga=GA1.1.1848973529.1699031414; csrftoken=0lHZKoZjyLt3oBkJGNiepOr2oRaFocOWTyEQbVzdnS3UxaqEVOgg38LKuPNqMS6p; QianFanID=xgd25v03suc75k86anq2g9lmvasa2me6; _ga_6Z94VT54DV=GS1.1.1700844413.9.1.1700844607.0.0.0']
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-           'Cookie': '_ga=GA1.1.1848973529.1699031414; csrftoken=O8GCr9HvXNKWAK81g6tHviB6IluKJ9faQ9j0wWC7mW8akQngXM1JAVgLUTffHzuf; QianFanID=hnojc2hlefnixsyraa8rcqyfvj7wxscd; _ga_6Z94VT54DV=GS1.1.1700361982.6.1.1700362098.0.0.0'
-}
-
-headers_movie = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.2 Safari/605.1.15',
-           'Cookie': '_ga=GA1.1.2070055861.1700363162; _ga_6Z94VT54DV=GS1.1.1700363161.1.1.1700363488.0.0.0; csrftoken=6HYo7MsZmMX2X16fdEdSnKwJ2pCG2inblkdVyADS3kgS53KzbbFuAQAMwIXNyXBT; QianFanID=faeq2621j9l766ba4pxayr6d2hzicvek'
+           'Cookie': '_ga=GA1.1.1920616457.1700845863; _ga_6Z94VT54DV=GS1.1.1700845863.1.0.1700845863.0.0.0; csrftoken=6Ldx0ATalNQ2mch3Pa3SelB2t8nRdRHs9Je5cZPoNWZN9u5JZe1qiE5tyWZIRxAv; QianFanID=jto7fmw7peb92sltfardk8ak3zjlwlfs'
 }
 
 session = requests.Session()
@@ -40,10 +39,11 @@ def good_match(s1, s2):
        return True 
     return False
 
-def _extract_movie_url(req_url, query):
+def _extract_movie_url(req_url, query, random_number):
     #print(req_url, query)
     try :
-        resp = session.get(req_url, headers = headers_movie)  ##  此处输入的url是登录后的豆瓣网页链接
+        headers['Cookie'] = all_cookies[random_number]
+        resp = session.get(req_url, headers = headers)  ##  此处输入的url是登录后的豆瓣网页链接
         httpDoc = resp.text
         soup = None
         try:
@@ -91,9 +91,10 @@ def _extract_movie_url(req_url, query):
         print(traceback.format_exc())
     return None
 
-def _extract_page(req_url):
+def _extract_page(req_url, random_number):
     urls = []
     try :
+        headers['Cookie'] = all_cookies[random_number]
         resp = session.get(req_url, headers = headers)  ##  此处输入的url是登录后的豆瓣网页链接
         httpDoc = resp.text
         soup = None
@@ -118,6 +119,7 @@ def _extract_page(req_url):
         pass
     return urls
 def get_from_qianfan(query):
+    random_number = random.randint(0, len(all_cookies) - 1)
     if "网盘" in query:
         query = query.replace("网盘", "")
     elif "云盘" in query:
@@ -138,14 +140,15 @@ def get_from_qianfan(query):
     else:
         feed_url="{}/search/?pan=all&q={}".format(ROOT_URL, query)
     print(feed_url, query)
-    urls=_extract_page(feed_url)
+    urls=_extract_page(feed_url, random_number)
     final_rets = []
     for url in urls:
-      ret= _extract_movie_url(url, query)
+      ret= _extract_movie_url(url, query, random_number)
       if ret is not None:
           final_rets.append(ret)
     return final_rets
-#print(get_from_qianfan("法医秦明夸克"))
+print(get_from_qianfan("法医秦明夸克"))
 #movie_url='https://pan.qianfan.app/share/eyJtb2RlbCI6ImFsaXl1bmRyaXZlaW5mbyIsImlkIjoyNDUyODR9:omcB1Y52cd76ANQ3RGq8TkBXtKOlBKQQOyVWfWhNZT4'
-#query="法医秦明"
+#movie_url='https://pan.qianfan.app/share/eyJtb2RlbCI6ImFsaXl1bmRyaXZlaW5mbyIsImlkIjozMjA1NDh9:PZW0AMTvyH3Vv8BsAIr-1eQocRzrVipwNpZgHcp6xX4/'
+#query="你好李焕英"
 #print(_extract_movie_url(movie_url, query))

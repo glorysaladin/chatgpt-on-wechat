@@ -4,6 +4,8 @@ import requests
 import json
 import re
 import plugins
+from bridge.context import ContextType
+from channel.chat_message import ChatMessage
 from bridge.reply import Reply, ReplyType
 from plugins import *
 import time
@@ -45,32 +47,54 @@ class Introduce(Plugin):
             reply.content = f"{msg}"
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS 
+
+        if content.startswith("我是") or content.startswith("I'm") or e_context["context"].type == ContextType.ACCEPT_FRIEND:
+            #reply = Reply()  # 创建回复消息对象
+            #reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            #reply.content = "你好，找影视剧请发送  找+资源名 ； 例如 找水浒传 ， 一定要带\'找\'字哦"
+            #e_context["reply"] = reply
+            #e_context.action = EventAction.BREAK_PASS 
+
+            e_context["context"].type = ContextType.TEXT
+            msg: ChatMessage = e_context["context"]["msg"]
+            logger.info(f"start to welcome {msg.from_user_nickname}.")
+            e_context["context"].content = f'以你好作为欢迎语开头， 然后告诉对方一定要以"找+资源名"格式找资源, 并用"找狂飙"举例, 然后建议他收藏我方便以后查找资源, 最后添加一句随机的祝福语。上面的欢迎语要控制在20-30个字以内。'
+            e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
+            return
+           
         if content == "娱乐一下":
             # 发送图片
             self.ent_datas = {}
             ent_data_path=os.path.join(self.curdir, "ent_datas.pkl")
             if os.path.exists(ent_data_path):
                 self.ent_datas = read_pickle(ent_data_path)
-            imageUrl=""
+            imageUrls=""
             comments=[]
             for key in self.ent_datas:
                 if self.ent_datas[key]["is_used"]:
                     continue
-                imageUrl = self.ent_datas[key]["url"]
+                imageUrls = self.ent_datas[key]["url"]
                 comments = self.ent_datas[key]["comments"]
                 break
 
             receivers = e_context["context"].kwargs["receiver"]
-            if len(imageUrl) > 0:
+            image_url_list = imageUrls.split(",")
+            for imageUrl in image_url_list:
                 rc = img_to_jpeg(imageUrl)
                 logger.info("imgurl={}".format(imageUrl))
                 send(rc, e_context, ReplyType.IMAGE)
+            if len(image_url_list) > 0:
                 time.sleep(self.conf['interval'])
 
-            for comment in comments:
+            for comment in comments[:-1]:
                 e_context['context'].kwargs['receiver'] = receivers
                 e_context['context'].kwargs['session_id'] = receivers
-                send2(comment, e_context, ReplyType.TEXT)
+                send(comment, e_context, ReplyType.TEXT)
+                time.sleep(3)
+
+            e_context['context'].kwargs['receiver'] = receivers
+            e_context['context'].kwargs['session_id'] = receivers
+            send2(comments[-1], e_context, ReplyType.TEXT)
             self.ent_datas[key]["is_used"] = True
             write_pickle(ent_data_path, self.ent_datas)
             e_context.action = EventAction.BREAK_PASS 

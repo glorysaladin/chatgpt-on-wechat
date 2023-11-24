@@ -173,7 +173,7 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
     if len(rets) == 0:
         rets = get_from_qianfan(moviename)
         if len(rets) == 0:
-            return False, "未找到资源，可尝试缩短关键词，或者联系群主查找"
+            return False, "未找到资源, 可尝试缩短关键词, 只保留资源名."
     if len(rets) >= 5:
        num = len(rets)
        rets = rets[0:5]
