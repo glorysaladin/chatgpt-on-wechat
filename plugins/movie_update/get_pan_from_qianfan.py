@@ -35,7 +35,7 @@ def good_match(s1, s2):
     set1 = set(s1)
     set2 = set(s2)
     common_chars = set1.intersection(set2)
-    if len(common_chars)*1.0  / (len(set1) + 0.1) > 0.3:
+    if len(common_chars)*1.0  / (len(set1) + 0.1) > 0.4:
        return True 
     return False
 

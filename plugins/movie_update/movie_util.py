@@ -8,6 +8,7 @@ import traceback
 import urllib
 import requests
 from .get_pan_from_qianfan import *
+from .get_pan_from_funletu import *
 
 def download(url):
     resp = requests.get(url)
@@ -164,12 +165,15 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
              href = item['href']
              title = item['title'].replace("<strong>", "").replace("</strong>", "")
         if good_match(moviename, title):
-        #if moviename in title:
              movieurl = href
              link = get_source_link(href)
              if link.strip() == "":
                  link = href.split("url=")[1].split("&")[0]
              rets.append("{}\n{}".format(title, link))
+
+    if len(rets) == 0:
+        rets = get_from_funletu(moviename)
+
     if len(rets) == 0:
         rets = get_from_qianfan(moviename)
         if len(rets) == 0:
