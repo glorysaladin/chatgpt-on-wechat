@@ -11,6 +11,7 @@ import traceback
 from common.log import logger
 from .util import *
 from bridge.context import ContextType
+import datetime
 
 @plugins.register(
     name="movie_update",                         # 插件的名称
