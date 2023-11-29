@@ -341,6 +341,7 @@ def get_mps(self, update=False):
 def set_alias(self, userName, alias):
     oldFriendInfo = utils.search_dict_list(
         self.memberList, 'UserName', userName)
+    logger.info("oldFrindInfo={}".format(oldFriendInfo))
     if oldFriendInfo is None:
         return ReturnValue({'BaseResponse': {
             'Ret': -1001, }})
@@ -350,13 +351,19 @@ def set_alias(self, userName, alias):
         'UserName': userName,
         'CmdId': 2,
         'RemarkName': alias,
+        'Alias': alias,
         'BaseRequest': self.loginInfo['BaseRequest'], }
     headers = {'User-Agent': config.USER_AGENT}
+    logger.info("url={}".format(url))
     r = self.s.post(url, json.dumps(data, ensure_ascii=False).encode('utf8'),
                     headers=headers)
+    logger.info("r={}".format(r))
     r = ReturnValue(rawResponse=r)
+    logger.debug("r2={}".format(r))
     if r:
         oldFriendInfo['RemarkName'] = alias
+        oldFriendInfo['Alias'] = alias
+        logger.info("success to set alias for userName {}, oldFriendInfo={}".format(userName, oldFriendInfo))
     return r
 
 

@@ -142,7 +142,16 @@ class WechatChannel(ChatChannel):
     @time_checker
     @_check
     def handle_single(self, cmsg: ChatMessage):
-        # filter system message
+        logger.info("handle_single_cmsg={}".format(cmsg._rawmsg))
+        if "User" in cmsg._rawmsg and "Alias" in cmsg._rawmsg["User"] and cmsg._rawmsg["User"]["Alias"] == "":
+            if itchat.set_alias(cmsg._rawmsg["FromUserName"], cmsg._rawmsg["FromUserName"]):
+                #logger.debug("set alias {}.".format(cmsg._rawmsg["FromUserName"]))
+                logger.info("UserName Info = {}".format(itchat.search_friends(userName=cmsg._rawmsg["FromUserName"])))
+            else:
+                logger.info("failed to set alias {}".format(cmsg._rawmsg["FromUserName"]))
+        else:
+            logger.info("Already has Alias. UserName Info = {}".format(itchat.search_friends(userName=cmsg._rawmsg["FromUserName"])))
+                
         if cmsg.other_user_id in ["weixin"]:
             return
         if cmsg.ctype == ContextType.VOICE:

@@ -15,7 +15,7 @@ from .util import *
 
 @plugins.register(
     name="introduce",                         # 插件的名称
-    desire_priority=1,                    # 插件的优先级
+    desire_priority=50,                    # 插件的优先级
     hidden=False,                         # 插件是否隐藏
     desc="群机器人功能介绍",        # 插件的描述
     version="0.0.1",                      # 插件的版本号
@@ -49,6 +49,7 @@ class Introduce(Plugin):
             e_context.action = EventAction.BREAK_PASS 
 
         if content.startswith("我是") or content.startswith("I'm") or e_context["context"].type == ContextType.ACCEPT_FRIEND:
+        #if content.startswith("我是") or content.startswith("I'm"):
             #reply = Reply()  # 创建回复消息对象
             #reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             #reply.content = "你好，找影视剧请发送  找+资源名 ； 例如 找水浒传 ， 一定要带\'找\'字哦"
@@ -58,7 +59,7 @@ class Introduce(Plugin):
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
             logger.info(f"start to welcome {msg.from_user_nickname}.")
-            e_context["context"].content = f'以你好作为欢迎语开头， 然后告诉对方一定要以"找+资源名"格式找资源, 并用"找狂飙"举例, 然后建议他收藏我方便以后查找资源, 最后添加一句随机的祝福语。上面的欢迎语要控制在20-30个字以内。'
+            e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以"找资源名"格式找资源, 并用"找还珠格格"举例, 建议他收藏我方便以后查找资源。最后添加一句随机的祝福语。上面的欢迎语要控制在50个字以内。'
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
            

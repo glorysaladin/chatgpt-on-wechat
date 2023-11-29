@@ -4,6 +4,7 @@ class LogSystem(object):
     handlerList = []
     showOnCmd = True
     loggingLevel = logging.INFO
+    #loggingLevel = logging.DEBUG
     loggingFile = None
     def __init__(self):
         self.logger = logging.getLogger('itchat')
