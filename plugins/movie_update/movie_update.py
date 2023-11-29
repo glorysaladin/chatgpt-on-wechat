@@ -28,6 +28,9 @@ class MovieUpdate(Plugin):
             self.conf = super().load_config()
             self.curdir = os.path.dirname(__file__)
             ads_path = os.path.join(self.curdir, "ads.txt")
+            if not os.path.isfile(ads_path):
+                with open(ads_path, 'w') as f:
+                   pass
             self.ads_content = self.load_ads(ads_path)
             self.user_datas_path = os.path.join(self.curdir, "user_datas.pkl")
 
