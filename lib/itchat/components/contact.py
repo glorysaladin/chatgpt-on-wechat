@@ -21,6 +21,7 @@ def load_contact(core):
     core.get_chatrooms = get_chatrooms
     core.get_mps = get_mps
     core.set_alias = set_alias
+    core.get_friend_info = get_friend_info
     core.set_pinned = set_pinned
     core.accept_friend = accept_friend
     core.get_head_img = get_head_img
@@ -337,11 +338,18 @@ def get_mps(self, update=False):
         self.get_contact(update=True)
     return utils.contact_deep_copy(self, self.mpList)
 
+def get_friend_info(self, userName):
+    friendInfo = utils.search_dict_list(
+        self.memberList, 'UserName', userName)
+    if friendInfo is None:
+        return ReturnValue({'BaseResponse': {
+            'Ret': -1001, }})
+    return friendInfo
 
 def set_alias(self, userName, alias):
     oldFriendInfo = utils.search_dict_list(
         self.memberList, 'UserName', userName)
-    logger.info("oldFrindInfo={}".format(oldFriendInfo))
+    #logger.info("oldFrindInfo={}".format(oldFriendInfo))
     if oldFriendInfo is None:
         return ReturnValue({'BaseResponse': {
             'Ret': -1001, }})
@@ -354,16 +362,14 @@ def set_alias(self, userName, alias):
         'Alias': alias,
         'BaseRequest': self.loginInfo['BaseRequest'], }
     headers = {'User-Agent': config.USER_AGENT}
-    logger.info("url={}".format(url))
+    #logger.info("url={}".format(url))
     r = self.s.post(url, json.dumps(data, ensure_ascii=False).encode('utf8'),
                     headers=headers)
-    logger.info("r={}".format(r))
     r = ReturnValue(rawResponse=r)
-    logger.debug("r2={}".format(r))
     if r:
         oldFriendInfo['RemarkName'] = alias
         oldFriendInfo['Alias'] = alias
-        logger.info("success to set alias for userName {}, oldFriendInfo={}".format(userName, oldFriendInfo))
+        #logger.info("success to set alias for userName {}, oldFriendInfo={}".format(userName, oldFriendInfo))
     return r
 
 

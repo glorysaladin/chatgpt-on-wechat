@@ -210,6 +210,15 @@ class Core(object):
             it is defined in components/contact.py
         '''
         raise NotImplementedError()
+
+    def get_friend_info(self, userName):
+        ''' get friend info
+            for options
+                - userName: 'UserName' key of info dict
+            it is defined in components/contact.py
+        '''
+        raise NotImplementedError()
+ 
     def set_pinned(self, userName, isPinned=True):
         ''' set pinned for a friend or a chatroom
             for options

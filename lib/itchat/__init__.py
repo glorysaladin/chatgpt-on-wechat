@@ -65,6 +65,7 @@ get_friends                 = instance.get_friends
 get_chatrooms               = instance.get_chatrooms
 get_mps                     = instance.get_mps
 set_alias                   = instance.set_alias
+get_friend_info             = instance.get_friend_info
 set_pinned                  = instance.set_pinned
 accept_friend               = instance.accept_friend
 get_head_img                = instance.get_head_img

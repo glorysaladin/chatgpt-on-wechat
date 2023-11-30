@@ -12,6 +12,8 @@ from common.log import logger
 from .util import *
 from bridge.context import ContextType
 import datetime
+from lib import itchat
+from lib.itchat.content import *
 
 @plugins.register(
     name="movie_update",                         # 插件的名称
@@ -32,12 +34,18 @@ class MovieUpdate(Plugin):
             if not os.path.isfile(ads_path):
                 with open(ads_path, 'w') as f:
                    pass
+
             self.ads_content = self.load_ads(ads_path)
-            self.user_datas_path = os.path.join(self.curdir, "user_datas.pkl")
 
             self.user_datas = {}
+            self.user_datas_path = os.path.join(self.curdir, "user_datas.pkl")
             if os.path.exists(self.user_datas_path):
                 self.user_datas = read_pickle(self.user_datas_path)
+
+            self.card_datas = {}
+            self.card_datas_path = os.path.join(self.curdir, "card_datas.pkl")
+            if os.path.exists(self.card_datas_path):
+                self.card_datas = read_pickle(self.card_datas_path)
 
             logger.info("[movie_update] daily_limit={} ads_content={}".format(self.conf['daily_limit'], self.ads_content))
             logger.info("[movie_update] inited")
@@ -75,23 +83,24 @@ class MovieUpdate(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
-        if content.startswith("找") or self.is_whitelist_movie(content):
+        if ContextType.TEXT == context.type and "资源充值" in content:
+            self.userInfo = self.get_user_info(e_context)
+            return self.recharge(e_context)
 
+        if ContextType.TEXT == context.type and "资源余额" in content:
+            self.userInfo = self.get_user_info(e_context)
+            return self.check_limit(e_context)
+                
+        if content.startswith("找") or self.is_whitelist_movie(content):
             self.userInfo = self.get_user_info(e_context)
             logger.info('Cur User Info = {}'.format(self.userInfo))
-
+      
             if self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
                 reply = Reply(ReplyType.ERROR, "您今日搜索次数过多，请明日再来;") 
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
                 return False
 
-            if ContextType.TEXT == context.type and "资源充值" in content:
-                return self.recharge(e_context)
-
-            if ContextType.TEXT == context.type and "资源余额" in content:
-                return self.check_limit(e_context)
-                
             #logger.info('Begin to get movie {}'.format(content))
             weburl= self.conf["web_url"]
             moviename=content.strip().replace("找","")
@@ -104,7 +113,7 @@ class MovieUpdate(Plugin):
             reply.content = f"{msg}"
             if ret:
                 #logger.info('Begin to update user data {}'.format(content))
-                self.user_datas[self.userInfo['user_id']]["limit"] -= 1
+                self.user_datas[self.userInfo['user_key']]["limit"] -= 1
                 write_pickle(self.user_datas_path, self.user_datas)
                 #logger.info('Finish to update user data {}'.format(content))
 
@@ -162,46 +171,64 @@ class MovieUpdate(Plugin):
 
         # 写入用户信息，企业微信没有from_user_nickname，所以使用from_user_id代替
         uid = msg.from_user_id if not isgroup else msg.actual_user_id
+
+        friendInfo = itchat.get_friend_info(uid)
+        logger.info('Frinend Info = {}'.format(friendInfo))
+        user_key = ""
+        try:
+            Province = friendInfo.get("Province", "")
+            City = friendInfo.get("City", "")
+            Sex = friendInfo.get("Sex", "")
+            NickName = friendInfo.get("NickName", "")
+            user_key = "{}|{}|{}|{}".format(Province, City, Sex, NickName)
+        except:
+           logger.error(traceback.format_exc())
+        logger.info("user_key={}".format(user_key))
+
         uname = (msg.from_user_nickname if msg.from_user_nickname else uid) if not isgroup else msg.actual_user_nickname
         userInfo = {
             "user_id": uid,
             "user_nickname": uname,
+            "user_key": user_key,
             "isgroup": isgroup,
             "group_id": msg.from_user_id if isgroup else "",
             "group_name": msg.from_user_nickname if isgroup else "",
+            
         }
-        if uid not in self.user_datas:
+
+        if user_key not in self.user_datas:
             # 纯新用户，数据写入
             u_data = {
                 "limit": self.conf["daily_limit"],
                 "time": current_date,
                 "is_pay_user": False
             }
-            self.user_datas[uid] = u_data
+            self.user_datas[user_key] = u_data
             write_pickle(self.user_datas_path, self.user_datas)
         else:
             # 老用户， 数据更新写入
             # 判断是否是新的一天
-            if self.user_datas[uid]["time"] != current_date:
-                if not self.user_datas[uid]["is_pay_user"]:
+            if self.user_datas[user_key]["time"] != current_date:
+                if not self.user_datas[user_key]["is_pay_user"]:
                     u_data = {
                         "limit": self.conf["daily_limit"],
                         "time": current_date,
                         "is_pay_user": False
                     }
-                    self.user_datas[uid] = u_data
+                    self.user_datas[user_key] = u_data
                 else:
-                    self.user_datas[uid]['time'] = current_date
+                    self.user_datas[user_key]['time'] = current_date
                 write_pickle(self.user_datas_path, self.user_datas)
-        limit = self.user_datas[uid]["limit"] if "limit" in self.user_datas[uid] and self.user_datas[uid]["limit"] else False
+        limit = self.user_datas[user_key]["limit"] if "limit" in self.user_datas[user_key] and self.user_datas[user_key]["limit"] else False
         userInfo['limit'] = limit
-        userInfo['ispayuser'] = self.user_datas[uid]["is_pay_user"]
+        userInfo['ispayuser'] = self.user_datas[user_key]["is_pay_user"]
         return userInfo
 
     # 用户充值
     def recharge(self, e_context: EventContext):
         # 获取用户信息，进行充值
         user_id = self.userInfo['user_id']
+        user_key = self.userInfo['user_key']
         user_name = self.userInfo['user_nickname']
         content = e_context['context'].content
         pattern=r"([a-zA-Z0-9]+)"
@@ -216,9 +243,9 @@ class MovieUpdate(Plugin):
             card_exist = True
             if self.card_datas[key]['is_used'] == False:
                 # 次数充值
-                self.user_datas[user_id]['limit'] += self.card_datas[key]['limit']
+                self.user_datas[user_key]['limit'] += self.card_datas[key]['limit']
                 # 设置为付费用户
-                self.user_datas[user_id]['is_pay_user'] = True
+                self.user_datas[user_key]['is_pay_user'] = True
                 # 数据更新
                 write_pickle(self.user_datas_path, self.user_datas)
                 
@@ -235,27 +262,37 @@ class MovieUpdate(Plugin):
                 card_used=True
         else:
             card_exist=False
+
+        reply = Reply()  # 创建回复消息对象
+        reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+
         if not card_exist:
             key="|".join(keys)
-            return Text("[MJ] 卡密[{}]不存在,请联系客服确认.".format(key), e_context)
+            reply.content = "卡密[{}]不存在,请联系客服确认.".format(key)
         if card_used:
             key="|".join(keys)
-            return Text("[MJ] 卡密[{}]已被用户【{}】在【{}】充值使用,请确认.".format(key, self.card_datas[key]['used_user_name'], self.card_datas[key]['used_date']), e_context)
+            reply.content = "卡密[{}]已被用户【{}】在【{}】充值使用,请确认.".format(key, self.card_datas[key]['used_user_name'], self.card_datas[key]['used_date'])
         if card_exist and not card_used:
-            return Text("[MJ] 恭喜您充值成功, 当前剩余额度[ {} ]次.".format(self.user_datas[user_id]['mj_data']['limit']), e_context)
+            reply.content = "恭喜您充值成功, 当前剩余额度[ {} ]次.".format(self.user_datas[user_key]['limit'])
+        e_context["reply"] = reply
+        e_context.action = EventAction.BREAK_PASS
 
     # 额度查询
     def check_limit(self, e_context: EventContext):
         # 获取用户信息，进行充值
+        reply = Reply()  # 创建回复消息对象
+        reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
         user_id = self.userInfo['user_id']
+        user_key = self.userInfo['user_key']
         user_name = self.userInfo['user_nickname']
-        limit = self.user_datas[user_id]['limit']
+        limit = self.user_datas[user_key]['limit']
         if limit <= 5:
-            return Text("您当前剩余额度{}次, 请及时联系群主充值.".format(self.user_datas[user_id]['mj_data']['limit']), e_context)
+            reply.content = "您当前剩余额度{}次, 请及时联系群主充值.".format(self.user_datas[user_key]['limit'])
         else:
-            return Text("您当前剩余额度{}次.".format(self.user_datas[user_id]['mj_data']['limit']), e_context)
+            reply.content = "您当前剩余额度{}次.".format(self.user_datas[user_key]['limit'])
+        e_context["reply"] = reply
+        e_context.action = EventAction.BREAK_PASS
 
- 
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
