@@ -43,7 +43,7 @@ class MovieUpdate(Plugin):
                 self.user_datas = read_pickle(self.user_datas_path)
 
             self.card_datas = {}
-            self.card_datas_path = os.path.join(self.curdir, "card_datas.pkl")
+            self.card_datas_path = os.path.join(self.curdir, "movie_card_datas.pkl")
             if os.path.exists(self.card_datas_path):
                 self.card_datas = read_pickle(self.card_datas_path)
 
@@ -104,7 +104,7 @@ class MovieUpdate(Plugin):
             #logger.info('Begin to get movie {}'.format(content))
             weburl= self.conf["web_url"]
             moviename=content.strip().replace("找","")
-            invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "+", "资源" "\"", "”", "“", "《", "》"]
+            invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "+", "资源" "\"", "”", "“", "《", "》", "谢谢"]
             for term in invalid_terms:
                 moviename = moviename.replace(term , "")
             ret, msg = search_movie(weburl, moviename)
@@ -112,10 +112,8 @@ class MovieUpdate(Plugin):
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"
             if ret:
-                #logger.info('Begin to update user data {}'.format(content))
                 self.user_datas[self.userInfo['user_key']]["limit"] -= 1
                 write_pickle(self.user_datas_path, self.user_datas)
-                #logger.info('Finish to update user data {}'.format(content))
 
                 reply.content += "\n\n"
                 reply.content += "---------------------------\n"
