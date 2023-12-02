@@ -1,5 +1,6 @@
 {
-    "post_id": 1529,
+    "post_id": 1530,
     "web_url": "https://affdz.com",
-    "daily_limit": 3
+    "daily_limit": 3,
+    "movie_cards": "/home/lighthouse/project/movie_cards/movie_card_datas.pkl"
 }

@@ -43,7 +43,7 @@ class MovieUpdate(Plugin):
                 self.user_datas = read_pickle(self.user_datas_path)
 
             self.card_datas = {}
-            self.card_datas_path = os.path.join(self.curdir, "movie_card_datas.pkl")
+            self.card_datas_path = self.conf["movie_cards"]
             if os.path.exists(self.card_datas_path):
                 self.card_datas = read_pickle(self.card_datas_path)
 
