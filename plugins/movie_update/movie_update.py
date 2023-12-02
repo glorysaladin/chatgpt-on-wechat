@@ -83,9 +83,11 @@ class MovieUpdate(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
-        if ContextType.TEXT == context.type and "资源充值" in content:
-            self.userInfo = self.get_user_info(e_context)
-            return self.recharge(e_context)
+        #if ContextType.TEXT == context.type and "资源充值" in content:
+        # 所有的消息都检查是否是充值
+        if ContextType.TEXT == context.type:
+            if self.recharge(e_context):
+                return
 
         if ContextType.TEXT == context.type and "资源余额" in content:
             self.userInfo = self.get_user_info(e_context)
@@ -94,29 +96,37 @@ class MovieUpdate(Plugin):
         if content.startswith("找") or self.is_whitelist_movie(content):
             self.userInfo = self.get_user_info(e_context)
             logger.info('Cur User Info = {}'.format(self.userInfo))
+
+            moviename=content.strip().replace("找","")
+            invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "【","】", "[", "]"]
+            for term in invalid_terms:
+                moviename = moviename.replace(term , "")
+            is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
       
-            if self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
-                reply = Reply(ReplyType.ERROR, "您今日搜索次数过多，请明日再来;") 
+            if is_new_movie and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                reply = Reply(ReplyType.ERROR, "系统服务过载，将限定为部分人使用，请点击链接激活： https://sourl.cn/8VBSBe \n {}".format(formatted_time)) 
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
                 return False
 
             #logger.info('Begin to get movie {}'.format(content))
             weburl= self.conf["web_url"]
-            moviename=content.strip().replace("找","")
-            invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "+", "资源" "\"", "”", "“", "《", "》", "谢谢"]
-            for term in invalid_terms:
-                moviename = moviename.replace(term , "")
             ret, msg = search_movie(weburl, moviename)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"
             if ret:
-                self.user_datas[self.userInfo['user_key']]["limit"] -= 1
-                write_pickle(self.user_datas_path, self.user_datas)
+                if is_new_movie:
+                    self.user_datas[self.userInfo['user_key']]["limit"] -= 1
+                    self.user_datas[self.userInfo['user_key']]["search_words"].append(moviename)
+                    write_pickle(self.user_datas_path, self.user_datas)
 
                 reply.content += "\n\n"
                 reply.content += "---------------------------\n"
+                if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
+                    reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
                 reply.content += "所有资源存储在夸克网盘，长期追剧，建议下载夸克保存观看高清视频.\n"
                 reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
@@ -140,7 +150,7 @@ class MovieUpdate(Plugin):
         if len(moviename) > 20:
             return False
         self.movie_whitelist_datas = {}
-        movie_whitelist_data_path=os.path.join(self.curdir, "moviename_whitelist.pkl")
+        movie_whitelist_data_path=self.conf['movie_whitelist']
         if os.path.exists(movie_whitelist_data_path):
             self.movie_whitelist_datas = read_pickle(movie_whitelist_data_path)
         for white_movie in self.movie_whitelist_datas:
@@ -150,7 +160,7 @@ class MovieUpdate(Plugin):
 
     def add_movie_to_whitelist(self, moviename):
         self.movie_whitelist_datas = {}
-        movie_whitelist_data_path=os.path.join(self.curdir, "moviename_whitelist.pkl")
+        movie_whitelist_data_path=self.conf['movie_whitelist']
         if os.path.exists(movie_whitelist_data_path):
             self.movie_whitelist_datas = read_pickle(movie_whitelist_data_path)
 
@@ -191,7 +201,6 @@ class MovieUpdate(Plugin):
             "isgroup": isgroup,
             "group_id": msg.from_user_id if isgroup else "",
             "group_name": msg.from_user_nickname if isgroup else "",
-            
         }
 
         if user_key not in self.user_datas:
@@ -199,10 +208,12 @@ class MovieUpdate(Plugin):
             u_data = {
                 "limit": self.conf["daily_limit"],
                 "time": current_date,
-                "is_pay_user": False
+                "is_pay_user": False,
+                "search_words" : []
             }
             self.user_datas[user_key] = u_data
             write_pickle(self.user_datas_path, self.user_datas)
+        """
         else:
             # 老用户， 数据更新写入
             # 判断是否是新的一天
@@ -211,32 +222,39 @@ class MovieUpdate(Plugin):
                     u_data = {
                         "limit": self.conf["daily_limit"],
                         "time": current_date,
-                        "is_pay_user": False
+                        "is_pay_user": False,
                     }
                     self.user_datas[user_key] = u_data
                 else:
                     self.user_datas[user_key]['time'] = current_date
                 write_pickle(self.user_datas_path, self.user_datas)
+        """
         limit = self.user_datas[user_key]["limit"] if "limit" in self.user_datas[user_key] and self.user_datas[user_key]["limit"] else False
         userInfo['limit'] = limit
         userInfo['ispayuser'] = self.user_datas[user_key]["is_pay_user"]
+        userInfo['search_words'] = self.user_datas[user_key]['search_words']
         return userInfo
 
     # 用户充值
     def recharge(self, e_context: EventContext):
-        # 获取用户信息，进行充值
-        user_id = self.userInfo['user_id']
-        user_key = self.userInfo['user_key']
-        user_name = self.userInfo['user_nickname']
         content = e_context['context'].content
         pattern=r"([a-zA-Z0-9]+)"
         keys = re.findall(pattern, content)
-        # 检验卡密是否有效
-        card_exist = False
-        card_used = False
         key = ""
         if len(keys) > 0:
             key = keys[0]
+        # 卡密的长度设置为固定的20
+        if len(key) != 20:
+            return False
+
+        # 获取用户信息，进行充值
+        self.userInfo = self.get_user_info(e_context)
+        user_id = self.userInfo['user_id']
+        user_key = self.userInfo['user_key']
+        user_name = self.userInfo['user_nickname']
+        # 检验卡密是否有效
+        card_exist = False
+        card_used = False
         if key in self.card_datas:
             card_exist = True
             if self.card_datas[key]['is_used'] == False:
@@ -274,6 +292,7 @@ class MovieUpdate(Plugin):
             reply.content = "恭喜您充值成功, 当前剩余额度[ {} ]次.".format(self.user_datas[user_key]['limit'])
         e_context["reply"] = reply
         e_context.action = EventAction.BREAK_PASS
+        return True
 
     # 额度查询
     def check_limit(self, e_context: EventContext):
@@ -290,6 +309,17 @@ class MovieUpdate(Plugin):
             reply.content = "您当前剩余额度{}次.".format(self.user_datas[user_key]['limit'])
         e_context["reply"] = reply
         e_context.action = EventAction.BREAK_PASS
+
+    def is_new_search_word(self, search_words, movie_name):
+        is_new = True
+        set_movie_name = set(movie_name)
+        for word in search_words:
+            set_word = set(word)
+            common_chars = set_movie_name.intersection(set_word)
+            if len(common_chars)*1.0  / (len(set_movie_name) + 0.1) > 0.6:
+                is_new = False
+                break
+        return is_new
 
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
