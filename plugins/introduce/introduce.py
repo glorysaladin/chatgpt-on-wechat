@@ -36,6 +36,7 @@ class Introduce(Plugin):
             raise self.handle_error(e, "[introduce] init failed, ignore ")
 
     def on_handle_context(self, e_context: EventContext):
+        self.conf = super().load_config()
         content = e_context["context"].content
         if content == "功能介绍":
             conf = super().load_config()
@@ -48,14 +49,15 @@ class Introduce(Plugin):
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS 
 
-        if content.startswith("我是") or content.startswith("I'm") or e_context["context"].type == ContextType.ACCEPT_FRIEND:
-        #if content.startswith("我是") or content.startswith("I'm"):
-            #reply = Reply()  # 创建回复消息对象
-            #reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-            #reply.content = "你好，找影视剧请发送  找+资源名 ； 例如 找水浒传 ， 一定要带\'找\'字哦"
-            #e_context["reply"] = reply
-            #e_context.action = EventAction.BREAK_PASS 
+        if content == "开启新朋友消息":
+            self.conf["accept_friend_msg"] = True
+            super().save_config(self.conf)
 
+        if content == "关闭新朋友消息":
+            self.conf["accept_friend_msg"] = False
+            super().save_config(self.conf)
+
+        if content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
             logger.info(f"start to welcome {msg.from_user_nickname}.")
@@ -112,4 +114,6 @@ class Introduce(Plugin):
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '功能介绍'， 将获得机器人的功能介绍."
+        help_text += "输入 '开启新朋友消息'， 接受新朋友时将发送欢迎消息."
+        help_text += "输入 '关闭新朋友消息'， 接受新朋友时将不发送欢迎消息."
         return help_text

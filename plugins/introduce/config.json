@@ -1,3 +1,4 @@
 {
-   "interval":10
+   "interval":10,
+   "accept_friend_msg": true
 }
