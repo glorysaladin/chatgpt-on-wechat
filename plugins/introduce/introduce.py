@@ -52,10 +52,21 @@ class Introduce(Plugin):
         if content == "开启新朋友消息":
             self.conf["accept_friend_msg"] = True
             super().save_config(self.conf)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "已开启添加新朋友欢迎消息"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS 
+
 
         if content == "关闭新朋友消息":
             self.conf["accept_friend_msg"] = False
             super().save_config(self.conf)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "已关闭添加新朋友欢迎消息"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS 
 
         if content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
             e_context["context"].type = ContextType.TEXT
@@ -113,7 +124,7 @@ class Introduce(Plugin):
 
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
-        help_text += "输入 '功能介绍'， 将获得机器人的功能介绍."
-        help_text += "输入 '开启新朋友消息'， 接受新朋友时将发送欢迎消息."
-        help_text += "输入 '关闭新朋友消息'， 接受新朋友时将不发送欢迎消息."
+        help_text += "输入 '功能介绍'， 将获得机器人的功能介绍.\n"
+        help_text += "输入 '开启新朋友消息'， 接受新朋友时将发送欢迎消息.\n"
+        help_text += "输入 '关闭新朋友消息'， 接受新朋友时将不发送欢迎消息.\n"
         return help_text
