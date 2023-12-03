@@ -9,6 +9,7 @@ import urllib
 import requests
 from .get_pan_from_qianfan import *
 from .get_pan_from_funletu import *
+from .get_pan_from_uukk import *
 
 def download(url):
     resp = requests.get(url)
@@ -179,9 +180,14 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
             source += "2"
 
     if len(rets) == 0:
-        rets = get_from_qianfan(moviename)
+        rets = get_from_uukk(moviename)
         if len(rets) > 0:
             source += "3"
+
+    if len(rets) == 0:
+        rets = get_from_qianfan(moviename)
+        if len(rets) > 0:
+            source += "4"
         if len(rets) == 0:
             return False, "未找到资源, 可尝试缩短关键词, 只保留资源名."
     if len(rets) >= 5:
