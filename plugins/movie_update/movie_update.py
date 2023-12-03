@@ -103,7 +103,7 @@ class MovieUpdate(Plugin):
                 moviename = moviename.replace(term , "")
             is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
       
-            if is_new_movie and self.userInfo["limit"] < 0 and self.userInfo['user_nickname'] != '阿木达':
+            if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 reply = Reply(ReplyType.ERROR, "系统服务过载，将限定为部分人使用，请点击链接激活： https://sourl.cn/8VBSBe \n {}".format(formatted_time)) 
