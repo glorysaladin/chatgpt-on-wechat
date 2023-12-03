@@ -106,7 +106,7 @@ class MovieUpdate(Plugin):
             if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                reply = Reply(ReplyType.ERROR, "系统服务过载，将限定为部分人使用，请点击链接激活： https://sourl.cn/8VBSBe \n {}".format(formatted_time)) 
+                reply = Reply(ReplyType.ERROR, "额度用完啦，激活支持一下吧：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
                 return False
@@ -129,7 +129,7 @@ class MovieUpdate(Plugin):
                     reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
                 reply.content += "所有资源存储在夸克网盘，长期追剧，建议下载夸克保存观看高清视频.\n"
                 reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
-                reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
+                #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 reply.content += formatted_time + "\n"
@@ -180,17 +180,20 @@ class MovieUpdate(Plugin):
         # 写入用户信息，企业微信没有from_user_nickname，所以使用from_user_id代替
         uid = msg.from_user_id if not isgroup else msg.actual_user_id
 
-        friendInfo = itchat.get_friend_info(uid)
-        logger.info('Frinend Info = {}'.format(friendInfo))
         user_key = ""
-        try:
-            Province = friendInfo.get("Province", "")
-            City = friendInfo.get("City", "")
-            Sex = friendInfo.get("Sex", "")
-            NickName = friendInfo.get("NickName", "")
-            user_key = "{}|{}|{}|{}".format(Province, City, Sex, NickName)
-        except:
-           logger.error(traceback.format_exc())
+        if isgroup:
+            logger.info('Group Info = {}'.format(msg))
+        else:
+            friendInfo = itchat.get_friend_info(uid)
+            logger.info('Frinend Info = {}'.format(friendInfo))
+            try:
+                Province = friendInfo.get("Province", "")
+                City = friendInfo.get("City", "")
+                Sex = friendInfo.get("Sex", "")
+                NickName = friendInfo.get("NickName", "")
+                user_key = "{}|{}|{}|{}".format(Province, City, Sex, NickName)
+            except:
+               logger.error(traceback.format_exc())
         logger.info("user_key={}".format(user_key))
 
         uname = (msg.from_user_nickname if msg.from_user_nickname else uid) if not isgroup else msg.actual_user_nickname
