@@ -158,6 +158,7 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
     listNode = bodyNode.find('div', attrs={"class":"sou-con-list"})
     aNodes = listNode.find_all('a')
     rets = []
+    source=""
     for item in aNodes:
         href = ""
         title = ""
@@ -170,21 +171,26 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
              if link.strip() == "":
                  link = href.split("url=")[1].split("&")[0]
              rets.append("{}\n{}".format(title, link))
+             source="1"
 
     if len(rets) == 0:
         rets = get_from_funletu(moviename)
+        if len(rets) > 0:
+            source += "2"
 
     if len(rets) == 0:
         rets = get_from_qianfan(moviename)
+        if len(rets) > 0:
+            source += "3"
         if len(rets) == 0:
             return False, "未找到资源, 可尝试缩短关键词, 只保留资源名."
     if len(rets) >= 5:
        num = len(rets)
        rets = rets[0:5]
-       rets.insert(0, "找到 {} 个资源, 展示前5个:\n".format(num))
+       rets.insert(0, "[{}]找到 {} 个资源, 展示前5个:\n".format(source, num))
 
     if len(rets) < 5:
-       rets.insert(0, "找到 {} 个资源:\n".format(len(rets)))
+       rets.insert(0, "[{}]找到 {} 个资源:\n".format(source, len(rets)))
     return True, "\n".join(rets)
 
 def search_movie(web_url, movie):
