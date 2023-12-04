@@ -128,8 +128,10 @@ class MovieUpdate(Plugin):
                 if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
                     reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
                 reply.content += "所有资源存储在夸克网盘，长期追剧，建议下载夸克保存观看高清视频.\n"
-                reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
+                #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
+                if not self.userInfo['isgroup']:
+                    reply.content += "资源是免费分享的，能帮到你请随意打赏点辛苦费吧🌹\n"
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 reply.content += formatted_time + "\n"
