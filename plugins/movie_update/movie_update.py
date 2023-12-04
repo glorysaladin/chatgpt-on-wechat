@@ -124,10 +124,10 @@ class MovieUpdate(Plugin):
                     write_pickle(self.user_datas_path, self.user_datas)
 
                 reply.content += "\n\n"
-                reply.content += "---------------------------\n"
+                reply.content += "------------------------------\n"
                 if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
                     reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
-                reply.content += "所有资源存储在夸克网盘，长期追剧，建议下载夸克保存观看高清视频.\n"
+                reply.content += "提示：夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
                 #if not self.userInfo['isgroup']:
