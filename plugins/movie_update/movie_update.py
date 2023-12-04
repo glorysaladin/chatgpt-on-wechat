@@ -106,7 +106,7 @@ class MovieUpdate(Plugin):
             if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                reply = Reply(ReplyType.ERROR, "额度用完啦，激活支持一下吧：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
+                reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
                 return False
@@ -130,8 +130,8 @@ class MovieUpdate(Plugin):
                 reply.content += "所有资源存储在夸克网盘，长期追剧，建议下载夸克保存观看高清视频.\n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
-                if not self.userInfo['isgroup']:
-                    reply.content += "资源是免费分享的，能帮到你请随意打赏点辛苦费吧🌹\n"
+                #if not self.userInfo['isgroup']:
+                #    reply.content += "资源是免费分享的，能帮到你请随意打赏点辛苦费吧🌹\n"
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 reply.content += formatted_time + "\n"
