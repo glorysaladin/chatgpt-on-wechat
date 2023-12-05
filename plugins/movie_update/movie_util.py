@@ -11,9 +11,12 @@ from .get_pan_from_qianfan import *
 from .get_pan_from_funletu import *
 from .get_pan_from_uukk import *
 
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"}
+
 def download(url):
-    resp = requests.get(url)
+    resp = requests.get(url, headers=headers)
     return resp.text
+
 
 def _extract_update(httpDoc, pattern='json'):
     soup = None
@@ -65,7 +68,7 @@ def _extract_movie_info(httpDoc, pattern='json'):
     return title_postid_map
 
 def get_source_link(url):
-    resp = requests.get(url)
+    resp = requests.get(url, headers=headers)
     httpDoc = resp.text
     soup = None
     try:
@@ -199,9 +202,10 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
        rets.insert(0, "[{}]找到 {} 个资源:\n".format(source, len(rets)))
     return True, "\n".join(rets)
 
+
 def search_movie(web_url, movie):
     url="{}/search.php?q={}".format(web_url, movie)
-    resp = requests.get(url)
+    resp = requests.get(url, headers=headers)
     return _get_search_result(resp.text, movie)
 
 #print(get_movie_update(1414))
