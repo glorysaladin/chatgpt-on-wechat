@@ -264,6 +264,8 @@ class MovieUpdate(Plugin):
             card_exist = True
             if self.card_datas[key]['is_used'] == False:
                 # 次数充值
+                if self.user_datas[user_key]['limit'] < 0 :
+                    self.user_datas[user_key]['limit'] = 0
                 self.user_datas[user_key]['limit'] += self.card_datas[key]['limit']
                 # 设置为付费用户
                 self.user_datas[user_key]['is_pay_user'] = True
