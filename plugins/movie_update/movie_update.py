@@ -98,7 +98,7 @@ class MovieUpdate(Plugin):
             logger.info('Cur User Info = {}'.format(self.userInfo))
 
             moviename=content.strip().replace("找","")
-            invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "【","】", "[", "]", "➕"]
+            invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "\'" , "【","】", "[", "]", "➕"]
             for term in invalid_terms:
                 moviename = moviename.replace(term , "")
             is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
