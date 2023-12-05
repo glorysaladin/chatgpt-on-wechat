@@ -36,6 +36,8 @@ class Introduce(Plugin):
             raise self.handle_error(e, "[introduce] init failed, ignore ")
 
     def on_handle_context(self, e_context: EventContext):
+        if e_context["context"].type != ContextType.TEXT:
+            return
         self.conf = super().load_config()
         content = e_context["context"].content
         if content == "功能介绍":

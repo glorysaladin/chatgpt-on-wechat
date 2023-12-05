@@ -42,8 +42,15 @@ class WechatMessage(ChatMessage):
                 self.content = itchat_msg["Content"]
                 if is_group:
                     self.actual_user_nickname = re.findall(r"\"(.*?)\"", itchat_msg["Content"])[0]
+            elif "红包" in itchat_msg["Text"]:
+                self.ctype = ContextType.MONEY
+                self.content = itchat_msg["Text"]
             else:
                 raise NotImplementedError("Unsupported note message: " + itchat_msg["Content"])
+        elif itchat_msg["Type"] == NOTE and itchat_msg["MsgType"] == 49:
+            if "转账" in itchat_msg["Text"]:
+                self.ctype = ContextType.MONEY
+                self.content = itchat_msg["Text"]
         elif itchat_msg["Type"] == ATTACHMENT:
             self.ctype = ContextType.FILE
             self.content = TmpDir().path() + itchat_msg["FileName"]  # content直接存临时目录路径

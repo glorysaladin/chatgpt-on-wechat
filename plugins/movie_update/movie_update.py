@@ -54,8 +54,9 @@ class MovieUpdate(Plugin):
             raise self.handle_error(e, "[movie_update] init failed, ignore ")
 
     def on_handle_context(self, e_context: EventContext):
-        content = e_context["context"].content
+        logger.debug("movie_update_handle={}".format(e_context))
         context = e_context['context']
+        content = context.content
         if content == "电影更新":
             conf = super().load_config()
             post_id = conf["post_id"]
@@ -83,6 +84,20 @@ class MovieUpdate(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
+        if context.type == ContextType.MONEY:
+            self.recharge_with_money(e_context)
+            #reply = Reply()  # 创建回复消息对象
+            #reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            #reply.content = "感谢您的支持, 资源小助手将继续为您服务."
+            #e_context["reply"] = reply
+            #e_context.action = EventAction.BREAK_PASS
+
+            e_context["context"].type = ContextType.TEXT
+            msg: ChatMessage = e_context["context"]["msg"]
+            e_context["context"].content = f"请你用一种比较萌的语气，感谢对方的红包奖励，将继续卖力为对方寻找需要的影视资源。"
+            e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
+            return
+
         #if ContextType.TEXT == context.type and "资源充值" in content:
         # 所有的消息都检查是否是充值
         if ContextType.TEXT == context.type:
@@ -106,9 +121,16 @@ class MovieUpdate(Plugin):
             if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
-                e_context["reply"] = reply
-                e_context.action = EventAction.BREAK_PASS
+                #reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
+                #e_context["reply"] = reply
+                #e_context.action = EventAction.BREAK_PASS
+                e_context["context"].type = ContextType.TEXT
+                msg: ChatMessage = e_context["context"]["msg"]
+                e_context["context"].content = f"请你用一种比较萌的语气，让对方给你发一个任意额度的红包，发送红包之后，自己将元气慢慢，继续卖力为对方寻找需要的影视资源。"
+                e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
+                return
+
+
                 return False
 
             #logger.info('Begin to get movie {}'.format(content))
@@ -240,6 +262,18 @@ class MovieUpdate(Plugin):
         userInfo['search_words'] = self.user_datas[user_key]['search_words']
         return userInfo
 
+    def recharge_with_money(self, e_context: EventContext):
+        # 获取用户信息，进行充值
+        self.userInfo = self.get_user_info(e_context)
+        user_id = self.userInfo['user_id']
+        user_key = self.userInfo['user_key']
+        user_name = self.userInfo['user_nickname']
+        self.user_datas[user_key]['limit'] = 10
+        # 设置为付费用户
+        #self.user_datas[user_key]['is_pay_user'] = True
+        # 数据更新
+        write_pickle(self.user_datas_path, self.user_datas)
+    
     # 用户充值
     def recharge(self, e_context: EventContext):
         content = e_context['context'].content
