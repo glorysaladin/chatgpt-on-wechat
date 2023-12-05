@@ -1,7 +1,7 @@
 {
     "post_id": 1550,
     "web_url": "https://affdz.com",
-    "daily_limit": 5,
+    "daily_limit": 1,
     "movie_cards": "/home/lighthouse/project/movie_infos/movie_card_datas.pkl",
     "movie_whitelist": "/home/lighthouse/project/movie_infos/moviename_whitelist.pkl"
 }
