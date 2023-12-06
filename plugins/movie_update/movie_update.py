@@ -264,9 +264,9 @@ class MovieUpdate(Plugin):
         msg: ChatMessage = context["msg"]
         isgroup = context.get("isgroup", False)
         uid = msg.from_user_id if not isgroup else msg.actual_user_id
-        current_timestamp = time.time()
-        current_date = time.strftime("%Y-%m-%d", time.localtime(current_timestamp))
-        user_key = "None 发了一个红包 \n{}".format(current_date)
+        current_time = datetime.datetime.now()
+        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        user_key = "None 发了一个红包 \n{}".format(formatted_time)
         try:
             friendInfo = itchat.get_friend_info(uid)
             Province = friendInfo.get("Province", "")
@@ -274,7 +274,7 @@ class MovieUpdate(Plugin):
             Sex = friendInfo.get("Sex", "")
             Signature = friendInfo.get("Signature", "")
             NickName = friendInfo.get("NickName", "")
-            user_key = "{} 发了一个红包\n省：{}\n市：{}\t性别：{}\n签名：{}\n时间：{}".format(NickName, Province, City, Sex, Signature,  current_date)
+            user_key = "{} 发了一个红包\n省：{}\n市：{}\n性别：{}\n签名：{}\n时间：{}".format(NickName, Province, City, Sex, Signature,  formatted_time)
 
             friend = itchat.search_friends(name='张五航')
             #logger.info("friend info ={}".format(friend))
