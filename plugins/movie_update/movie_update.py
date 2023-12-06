@@ -86,15 +86,10 @@ class MovieUpdate(Plugin):
 
         if context.type == ContextType.MONEY:
             self.recharge_with_money(e_context)
-            #reply = Reply()  # 创建回复消息对象
-            #reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-            #reply.content = "感谢您的支持, 资源小助手将继续为您服务."
-            #e_context["reply"] = reply
-            #e_context.action = EventAction.BREAK_PASS
-
+            self.send_money_msg(e_context)
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
-            e_context["context"].content = f"请你用一种比较萌的语气，感谢对方的红包奖励，将继续卖力为对方寻找需要的影视资源。"
+            e_context["context"].content = f"请你用一种比较萌的语气，感谢对方的红包奖励，将继续努力为对方寻找需要的影视资源。"
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
 
@@ -126,7 +121,7 @@ class MovieUpdate(Plugin):
                 #e_context.action = EventAction.BREAK_PASS
                 e_context["context"].type = ContextType.TEXT
                 msg: ChatMessage = e_context["context"]["msg"]
-                e_context["context"].content = f"请你用一种比较萌的语气，让对方给你发一个任意额度的红包，发送红包之后，自己将元气慢慢，继续卖力为对方寻找需要的影视资源。"
+                e_context["context"].content = f"请你用一种比较萌的语气，让对方给你发一个任意额度的红包，发送红包之后，自己将元气满满，继续努力为对方寻找需要的影视资源。"
                 e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
                 return
 
@@ -262,13 +257,40 @@ class MovieUpdate(Plugin):
         userInfo['search_words'] = self.user_datas[user_key]['search_words']
         return userInfo
 
+    def send_money_msg(self, e_context: EventContext):
+        context = e_context['context']
+        msg: ChatMessage = context["msg"]
+        isgroup = context.get("isgroup", False)
+        uid = msg.from_user_id if not isgroup else msg.actual_user_id
+        current_timestamp = time.time()
+        current_date = time.strftime("%Y-%m-%d", time.localtime(current_timestamp))
+        user_key = "None 发了一个红包 \n{}".format(current_date)
+        try:
+            friendInfo = itchat.get_friend_info(uid)
+            Province = friendInfo.get("Province", "")
+            City = friendInfo.get("City", "")
+            Sex = friendInfo.get("Sex", "")
+            Signature = friendInfo.get("Signature", "")
+            NickName = friendInfo.get("NickName", "")
+            user_key = "{} 发了一个红包\n省：{}\n市：{}\t性别：{}\n签名：{}\n时间：{}".format(NickName, Province, City, Sex, Signature,  current_date)
+
+            friend = itchat.search_friends(name='张五航')
+            #logger.info("friend info ={}".format(friend))
+            me = friend[0]["UserName"]
+            itchat.send(user_key, me)
+        except:
+            pass
+
+
     def recharge_with_money(self, e_context: EventContext):
         # 获取用户信息，进行充值
         self.userInfo = self.get_user_info(e_context)
         user_id = self.userInfo['user_id']
         user_key = self.userInfo['user_key']
         user_name = self.userInfo['user_nickname']
-        self.user_datas[user_key]['limit'] = 10
+        if self.user_datas[user_key]['limit'] < 0:
+            self.user_datas[user_key]['limit'] = 0
+        self.user_datas[user_key]['limit'] += 10
         # 设置为付费用户
         #self.user_datas[user_key]['is_pay_user'] = True
         # 数据更新
