@@ -198,10 +198,13 @@ class MovieUpdate(Plugin):
 
         # 写入用户信息，企业微信没有from_user_nickname，所以使用from_user_id代替
         uid = msg.from_user_id if not isgroup else msg.actual_user_id
+        uname = (msg.from_user_nickname if msg.from_user_nickname else uid) if not isgroup else msg.actual_user_nickname
 
         user_key = ""
         if isgroup:
             logger.info('Group Info = {}'.format(msg))
+            NickName = uname
+            user_key = "{}|{}|{}|{}".format("", "", "", NickName)
         else:
             friendInfo = itchat.get_friend_info(uid)
             logger.info('Frinend Info = {}'.format(friendInfo))
@@ -215,7 +218,6 @@ class MovieUpdate(Plugin):
                logger.error(traceback.format_exc())
         logger.info("user_key={}".format(user_key))
 
-        uname = (msg.from_user_nickname if msg.from_user_nickname else uid) if not isgroup else msg.actual_user_nickname
         userInfo = {
             "user_id": uid,
             "user_nickname": uname,
