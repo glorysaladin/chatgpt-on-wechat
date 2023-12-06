@@ -89,7 +89,7 @@ class MovieUpdate(Plugin):
             self.send_money_msg(e_context)
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
-            e_context["context"].content = f"请你用一种比较萌又不让人方案的语气，感谢对方的红包奖励，将继续努力为对方寻找需要的影视资源。"
+            e_context["context"].content = f"请你用一种比较萌的语气，感谢对方的红包奖励，将继续努力为对方寻找需要的影视资源。"
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
 
@@ -121,7 +121,7 @@ class MovieUpdate(Plugin):
                 #e_context.action = EventAction.BREAK_PASS
                 e_context["context"].type = ContextType.TEXT
                 msg: ChatMessage = e_context["context"]["msg"]
-                e_context["context"].content = f"以比较萌又不让人反感的语气，请求对方给你发一个任意额度的红包作为鼓励，慷慨发送红包之后，将努力提供更优质的搜索服务; 如果请求了两次对方还不发就说要罢工啦。"
+                e_context["context"].content = f"以比较萌的语气，告诉对方如果对之前的搜索还满意就发一个红包作为鼓励吧，慷慨发送红包之后，将努力提供更优质的搜索服务, 如果不发就要罢工啦。"
                 e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
                 return
 
