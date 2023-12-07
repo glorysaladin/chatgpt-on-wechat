@@ -151,7 +151,7 @@ def good_match(s1, s2):
        return True 
     return False
 
-def _get_search_result(httpDoc, moviename, pattern='json'):
+def _get_search_result(httpDoc, moviename, is_pay_user, pattern='json'):
     soup = None
     try:
         soup = BeautifulSoup(httpDoc, 'html5lib')
@@ -177,36 +177,37 @@ def _get_search_result(httpDoc, moviename, pattern='json'):
              rets.append("{}\n{}".format(title, link))
              source="1"
 
-    if len(rets) == 0:
-        rets = get_from_funletu(moviename)
+    if len(rets) == 0 or is_pay_user:
+        rets.extend(get_from_funletu(moviename))
         if len(rets) > 0:
             source += "2"
 
-    if len(rets) == 0:
-        rets = get_from_uukk(moviename)
+    if len(rets) == 0 or is_pay_user:
+        rets.extend(get_from_uukk(moviename, is_pay_user))
         if len(rets) > 0:
             source += "3"
 
-    if len(rets) == 0:
-        rets = get_from_qianfan(moviename)
+    if len(rets) == 0 or is_pay_user:
+        rets.extend(get_from_qianfan(moviename))
         if len(rets) > 0:
             source += "4"
         if len(rets) == 0:
-            return False, "未找到资源, 可尝试缩短关键词, 只保留资源名."
-    if len(rets) >= 5:
-       num = len(rets)
-       rets = rets[0:5]
-       rets.insert(0, "[{}]找到 {} 个资源, 展示前5个:\n".format(source, num))
+            return False, "未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."
 
-    if len(rets) < 5:
-       rets.insert(0, "[{}]找到 {} 个资源:\n".format(source, len(rets)))
+    num = len(rets)
+    if not is_pay_user:
+       rets = rets[0:5]
+    else:
+       rets = rets[0:20]
+    rets.insert(0, "[{}]找到 {} 个资源:\n".format(source, num))
+
     return True, "\n".join(rets)
 
 
-def search_movie(web_url, movie):
+def search_movie(web_url, movie, is_pay_user):
     url="{}/search.php?q={}".format(web_url, movie)
     resp = requests.get(url, headers=headers)
-    return _get_search_result(resp.text, movie)
+    return _get_search_result(resp.text, movie, is_pay_user)
 
 #print(get_movie_update(1414))
 #if __name__ == "__main__":

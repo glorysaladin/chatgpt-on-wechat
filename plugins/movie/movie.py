@@ -16,14 +16,14 @@ from lib import itchat
 from lib.itchat.content import *
 
 @plugins.register(
-    name="movie_update",                         # 插件的名称
+    name="movie",                         # 插件的名称
     desire_priority=100,                    # 插件的优先级
     hidden=False,                         # 插件是否隐藏
     desc="获取影视资源更新数据",        # 插件的描述
-    version="0.0.2",                      # 插件的版本号
+    version="0.0.3",                      # 插件的版本号
     author="gloarysaladin",                       # 插件的作者
 )
-class MovieUpdate(Plugin):
+class Movie(Plugin):
     def __init__(self):
         super().__init__()
         self.handlers[Event.ON_HANDLE_CONTEXT] = self.on_handle_context
@@ -47,20 +47,20 @@ class MovieUpdate(Plugin):
             if os.path.exists(self.card_datas_path):
                 self.card_datas = read_pickle(self.card_datas_path)
 
-            logger.info("[movie_update] daily_limit={} ads_content={}".format(self.conf['daily_limit'], self.ads_content))
-            logger.info("[movie_update] inited")
+            logger.info("[movie] daily_limit={} ads_content={}".format(self.conf['daily_limit'], self.ads_content))
+            logger.info("[movie] inited")
         except:
-            logger.error("[movie_update] inited failed.", traceback.format_exc())
-            raise self.handle_error(e, "[movie_update] init failed, ignore ")
+            logger.error("[movie] inited failed.", traceback.format_exc())
+            raise self.handle_error(e, "[movie] init failed, ignore ")
 
     def on_handle_context(self, e_context: EventContext):
-        logger.debug("movie_update_handle={}".format(e_context))
+        logger.debug("movie={}".format(e_context))
         context = e_context['context']
         content = context.content
         if content == "电影更新":
             conf = super().load_config()
             post_id = conf["post_id"]
-            print("movie_update: post_id = {}".format(post_id))
+            print("movie: post_id = {}".format(post_id))
             (last_post_id, msg) = get_movie_update(post_id)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
@@ -119,7 +119,7 @@ class MovieUpdate(Plugin):
                 #reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
                 reply = Reply()
                 reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-                reply.content = "非常感谢您的支持，请您发个红包给我作为鼓励, 这样您将能继续使用资源搜索服务。"
+                reply.content = "非常感谢您的支持，请您发个 1元以上的红包作为鼓励, 就可以继续资源搜索功能，同时可以享受夸克、百度、迅雷等多个网盘的资源搜索服务."
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
                 #e_context["context"].type = ContextType.TEXT
@@ -130,7 +130,7 @@ class MovieUpdate(Plugin):
 
             #logger.info('Begin to get movie {}'.format(content))
             weburl= self.conf["web_url"]
-            ret, msg = search_movie(weburl, moviename)
+            ret, msg = search_movie(weburl, moviename, self.userInfo['ispayuser'])
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"
@@ -142,13 +142,13 @@ class MovieUpdate(Plugin):
 
                 reply.content += "\n\n"
                 reply.content += "------------------------------\n"
-                if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
-                    reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
+                #if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
+                #    reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
                 reply.content += "提示：夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
                 #if not self.userInfo['isgroup']:
-                #    reply.content += "资源是免费分享的，能帮到你请随意打赏点辛苦费吧🌹\n"
+                #    reply.content += "资源免费分享的，能帮到你请随意打赏点辛苦费吧🌹\n"
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 reply.content += formatted_time + "\n"
@@ -294,7 +294,7 @@ class MovieUpdate(Plugin):
             self.user_datas[user_key]['limit'] = 0
         self.user_datas[user_key]['limit'] += 10
         # 设置为付费用户
-        #self.user_datas[user_key]['is_pay_user'] = True
+        self.user_datas[user_key]['is_pay_user'] = True
         # 数据更新
         write_pickle(self.user_datas_path, self.user_datas)
     
