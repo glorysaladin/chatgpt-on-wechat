@@ -117,12 +117,15 @@ class MovieUpdate(Plugin):
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 #reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
-                #e_context["reply"] = reply
-                #e_context.action = EventAction.BREAK_PASS
-                e_context["context"].type = ContextType.TEXT
-                msg: ChatMessage = e_context["context"]["msg"]
-                e_context["context"].content = f"请让对方给你发送一个红包作为鼓励，发送红包之后，将继续努力提供更优质的搜索服务。"
-                e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
+                reply = Reply()
+                reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+                reply.content = "非常感谢您的支持，请您发个红包给我作为鼓励, 这样您将能继续使用资源搜索服务。"
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK_PASS
+                #e_context["context"].type = ContextType.TEXT
+                #msg: ChatMessage = e_context["context"]["msg"]
+                #e_context["context"].content = f"请让对方给你发送一个红包作为鼓励，发送之后可以继续使用资源搜索服务。"
+                #e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
                 return
 
             #logger.info('Begin to get movie {}'.format(content))
