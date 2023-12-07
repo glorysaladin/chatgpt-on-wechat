@@ -156,6 +156,8 @@ class WechatChannel(ChatChannel):
             logger.debug("[WX]receive text msg: {}, cmsg={}".format(json.dumps(cmsg._rawmsg, ensure_ascii=False), cmsg))
         elif cmsg.ctype == ContextType.MONEY:
             logger.debug("[WX]receive money cmsg: {}".format(cmsg))
+        elif cmsg.ctype == ContextType.MSG_BUSY:
+            logger.info("[WX]receive busy cmsg: {}".format(cmsg))
         else:
             logger.debug("[WX]receive msg: {}, cmsg={}".format(cmsg.content, cmsg))
         context = self._compose_context(cmsg.ctype, cmsg.content, isgroup=False, msg=cmsg)

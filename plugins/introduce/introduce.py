@@ -37,7 +37,12 @@ class Introduce(Plugin):
 
     def on_handle_context(self, e_context: EventContext):
         self.conf = super().load_config()
+        context = e_context['context']
         content = e_context["context"].content
+        if context.type == ContextType.MSG_BUSY:
+            self.send_busy_notice(e_context)
+            return
+            
         if content == "功能介绍":
             conf = super().load_config()
             reply = Reply()  # 创建回复消息对象
@@ -67,6 +72,7 @@ class Introduce(Plugin):
             reply.content = "已关闭添加新朋友欢迎消息"
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS 
+
         if content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
@@ -110,8 +116,21 @@ class Introduce(Plugin):
             send2(comments[-1], e_context, ReplyType.TEXT)
             self.ent_datas[key]["is_used"] = True
             write_pickle(ent_data_path, self.ent_datas)
-            e_context.action = EventAction.BREAK_PASS 
-       
+         
+    def send_busy_notice(self, e_context: EventContext):
+        context = e_context['context']
+        msg: ChatMessage = context["msg"]
+        isgroup = context.get("isgroup", False)
+        uid = msg.from_user_id if not isgroup else msg.actual_user_id
+        current_time = datetime.datetime.now()
+        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        notice = "消息发送过于频繁 {}".format(formatted_time)
+        try:
+            friend = itchat.search_friends(name='张五航')
+            itchat.send(notice, friend[0]["UserName"])
+        except:
+            pass
+
     def load_file(self, input_path):
         f = open(input_path)
         lines = []

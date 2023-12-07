@@ -11,6 +11,7 @@ class ContextType(Enum):
     VIDEO = 5  # 视频信息
     SHARING = 6  # 分享信息
     MONEY = 7  # 红包信息
+    MSG_BUSY = 8  # 发送频繁
 
     IMAGE_CREATE = 10  # 创建图片命令
     ACCEPT_FRIEND = 19 # 同意好友请求

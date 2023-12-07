@@ -45,6 +45,9 @@ class WechatMessage(ChatMessage):
             elif "红包" in itchat_msg["Text"]:
                 self.ctype = ContextType.MONEY
                 self.content = itchat_msg["Text"]
+            elif "发送消息过于频繁" in itchat_msg["Content"]:
+                self.ctype = ContextType.MSG_BUSY
+                self.content = itchat_msg["Content"]
             else:
                 raise NotImplementedError("Unsupported note message: " + itchat_msg["Content"])
         elif itchat_msg["Type"] == NOTE and itchat_msg["MsgType"] == 49:
