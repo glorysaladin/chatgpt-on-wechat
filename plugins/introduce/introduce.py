@@ -36,8 +36,6 @@ class Introduce(Plugin):
             raise self.handle_error(e, "[introduce] init failed, ignore ")
 
     def on_handle_context(self, e_context: EventContext):
-        if e_context["context"].type != ContextType.TEXT:
-            return
         self.conf = super().load_config()
         content = e_context["context"].content
         if content == "功能介绍":
@@ -69,7 +67,6 @@ class Introduce(Plugin):
             reply.content = "已关闭添加新朋友欢迎消息"
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS 
-
         if content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
