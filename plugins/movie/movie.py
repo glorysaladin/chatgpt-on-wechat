@@ -93,6 +93,9 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
 
+        if content.strip() == "你好" or content.strip() == "您好":
+            return
+
         #if ContextType.TEXT == context.type and "资源充值" in content:
         # 所有的消息都检查是否是充值
         if ContextType.TEXT == context.type:
@@ -103,34 +106,39 @@ class Movie(Plugin):
             self.userInfo = self.get_user_info(e_context)
             return self.check_limit(e_context)
                 
+        only_affdz = True
         if content.startswith("找") or self.is_whitelist_movie(content):
-            self.userInfo = self.get_user_info(e_context)
-            logger.info('Cur User Info = {}'.format(self.userInfo))
+            only_affdz = False
+         
+        self.userInfo = self.get_user_info(e_context)
+        logger.info('Cur User Info = {}'.format(self.userInfo))
 
-            moviename=content.strip().replace("找","")
-            invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "，","," "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "\'" , "【","】", "[", "]", "➕"]
-            for term in invalid_terms:
-                moviename = moviename.replace(term , "")
-            is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
+        moviename=content.strip().replace("找","")
+        invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "，","," "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "\'" , "【","】", "[", "]", "➕"]
+        for term in invalid_terms:
+            moviename = moviename.replace(term , "")
+        is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
       
-            if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
-                current_time = datetime.datetime.now()
-                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                #reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
-                reply = Reply()
-                reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-                reply.content = "非常感谢您的支持，请您发个 1元以上的红包作为鼓励, 就可以继续资源搜索功能，同时可以享受夸克、百度、迅雷等多个网盘的资源搜索服务."
-                e_context["reply"] = reply
-                e_context.action = EventAction.BREAK_PASS
-                #e_context["context"].type = ContextType.TEXT
-                #msg: ChatMessage = e_context["context"]["msg"]
-                #e_context["context"].content = f"请让对方给你发送一个红包作为鼓励，发送之后可以继续使用资源搜索服务。"
-                #e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
-                return
+        if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
+            current_time = datetime.datetime.now()
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            #reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
+            reply = Reply()
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "非常感谢您的支持，请您发个 1元以上的红包作为鼓励, 就可以继续资源搜索功能，同时可以享受夸克、百度、迅雷等多个网盘的资源搜索服务."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            #e_context["context"].type = ContextType.TEXT
+            #msg: ChatMessage = e_context["context"]["msg"]
+            #e_context["context"].content = f"请让对方给你发送一个红包作为鼓励，发送之后可以继续使用资源搜索服务。"
+            #e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
+            return
 
-            #logger.info('Begin to get movie {}'.format(content))
-            weburl= self.conf["web_url"]
-            ret, msg = search_movie(weburl, moviename, self.userInfo['ispayuser'])
+        weburl= self.conf["web_url"]
+        ret, msg = search_movie(weburl, moviename, self.userInfo['ispayuser'], only_affdz)
+        if only_affdz and not ret:
+            return
+        else:
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"

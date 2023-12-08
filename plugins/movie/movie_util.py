@@ -151,7 +151,7 @@ def good_match(s1, s2):
        return True 
     return False
 
-def _get_search_result(httpDoc, moviename, is_pay_user, pattern='json'):
+def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='json'):
     soup = None
     try:
         soup = BeautifulSoup(httpDoc, 'html5lib')
@@ -177,22 +177,22 @@ def _get_search_result(httpDoc, moviename, is_pay_user, pattern='json'):
              rets.append("{}\n{}".format(title, link))
              source="1"
 
-    if len(rets) == 0 or is_pay_user:
+    if (len(rets) == 0 or is_pay_user) and  not only_affdz:
         rets.extend(get_from_funletu(moviename))
         if len(rets) > 0:
             source += "2"
 
-    if len(rets) == 0 or is_pay_user:
+    if (len(rets) == 0 or is_pay_user) and not only_affdz:
         rets.extend(get_from_uukk(moviename, is_pay_user))
         if len(rets) > 0:
             source += "3"
 
-    if len(rets) == 0 or is_pay_user:
+    if (len(rets) == 0 or is_pay_user) and not only_affdz:
         rets.extend(get_from_qianfan(moviename))
         if len(rets) > 0:
             source += "4"
-        if len(rets) == 0:
-            return False, "未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."
+    if len(rets) == 0:
+        return False, "未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."
 
     num = len(rets)
     if not is_pay_user:
@@ -203,11 +203,10 @@ def _get_search_result(httpDoc, moviename, is_pay_user, pattern='json'):
 
     return True, "\n".join(rets)
 
-
-def search_movie(web_url, movie, is_pay_user):
+def search_movie(web_url, movie, is_pay_user, only_affdz=False):
     url="{}/search.php?q={}".format(web_url, movie)
     resp = requests.get(url, headers=headers)
-    return _get_search_result(resp.text, movie, is_pay_user)
+    return _get_search_result(resp.text, movie, is_pay_user, only_affdz)
 
 #print(get_movie_update(1414))
 #if __name__ == "__main__":

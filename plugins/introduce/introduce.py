@@ -16,7 +16,7 @@ import datetime
 
 @plugins.register(
     name="introduce",                         # 插件的名称
-    desire_priority=50,                    # 插件的优先级
+    desire_priority=500,                    # 插件的优先级
     hidden=False,                         # 插件是否隐藏
     desc="群机器人功能介绍",        # 插件的描述
     version="0.0.1",                      # 插件的版本号
