@@ -15,8 +15,10 @@ from config import conf
 from common.log import logger
 
 def read_pickle(path):
-    with open(path, "rb") as f:
-        data = pickle.load(f)
+    data = {}
+    if os.path.getsize(path) > 0:
+        with open(path, "rb") as f:
+            data = pickle.load(f)
     return data
 
 def write_pickle(path, content):

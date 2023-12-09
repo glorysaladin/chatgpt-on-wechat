@@ -14,6 +14,7 @@ from bridge.context import ContextType
 import datetime
 from lib import itchat
 from lib.itchat.content import *
+import random
 
 @plugins.register(
     name="movie",                         # 插件的名称
@@ -46,6 +47,11 @@ class Movie(Plugin):
             self.card_datas_path = self.conf["movie_cards"]
             if os.path.exists(self.card_datas_path):
                 self.card_datas = read_pickle(self.card_datas_path)
+
+            self.ads_datas = {}
+            self.ads_datas_path = self.conf["ads"]
+            if os.path.exists(self.ads_datas_path):
+                self.ads_datas = read_pickle(self.ads_datas_path)
 
             logger.info("[movie] daily_limit={} ads_content={}".format(self.conf['daily_limit'], self.ads_content))
             logger.info("[movie] inited")
@@ -86,6 +92,64 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
+        if content.strip().startswith("添加广告"):
+            self.add_ads(e_context)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"添加广告成功."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("关闭广告"):
+            conf = super().load_config()
+            conf["open_ads"] = False
+            super().save_config(conf)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"关闭广告成功."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("开启广告"):
+            conf = super().load_config()
+            conf["open_ads"] = True
+            super().save_config(conf)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "开启广告成功."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("删除广告"):
+            self.del_ads(e_context)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "删除广告成功."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("固定广告"):
+            self.set_fixed_ad_id(e_context)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "设置固定广告成功."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("所有广告"):
+            all_ads = self.get_all_ads()
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "{}".format(all_ads)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if context.type == ContextType.MONEY:
             self.recharge_with_money(e_context)
             self.send_money_msg(e_context)
@@ -113,7 +177,7 @@ class Movie(Plugin):
             only_affdz = False
          
         self.userInfo = self.get_user_info(e_context)
-        logger.info('Cur User Info = {}'.format(self.userInfo))
+        logger.info('Cur User Info = {}, only_affdz={}'.format(self.userInfo, only_affdz))
 
         moviename=content.strip().replace("找","")
         invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "，","," "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "\'" , "【","】", "[", "]", "➕"]
@@ -165,6 +229,15 @@ class Movie(Plugin):
 
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS
+            movie_ads_content = self.get_rand_ads() 
+
+            msg: ChatMessage = context["msg"]
+            isgroup = context.get("isgroup", False)
+            # 写入用户信息，企业微信没有from_user_nickname，所以使用from_user_id代替
+            uid = msg.from_user_id if not isgroup else msg.actual_user_id
+            conf = super().load_config()
+            if len(movie_ads_content) > 2 and conf["open_ads"]:
+                itchat.send(movie_ads_content, uid)
 
     def load_ads(self, ads_path):
         f = open(ads_path)
@@ -369,6 +442,72 @@ class Movie(Plugin):
         e_context.action = EventAction.BREAK_PASS
         return True
 
+    def add_ads(self, e_context: EventContext):
+        self.ads_datas = {}
+        self.ads_datas_path = self.conf["ads"]
+        if os.path.exists(self.ads_datas_path):
+            self.ads_datas = read_pickle(self.ads_datas_path)
+        rand_num = str(random.randint(0,10000))
+        content = e_context['context'].content
+        content = content.replace("添加广告", "")
+        self.ads_datas[rand_num] = content 
+        write_pickle(self.ads_datas_path, self.ads_datas)
+
+    def del_ads(self, e_context: EventContext):
+        self.ads_datas = {}
+        self.ads_datas_path = self.conf["ads"]
+        if os.path.exists(self.ads_datas_path):
+            self.ads_datas = read_pickle(self.ads_datas_path)
+        content = e_context['context'].content
+        content = content.replace("删除广告", "")
+        try:
+            del self.ads_datas[content.strip()]
+            write_pickle(self.ads_datas_path, self.ads_datas)
+        except:
+            pass
+
+    def set_fixed_ad_id(self, e_context: EventContext):
+        self.conf = super().load_config()
+        content = e_context['context'].content
+        content = content.replace("固定广告", "")
+        self.conf["fixed_ads_id"] = content.strip()
+        super().save_config(conf)
+
+    def get_rand_ads(self):
+        try:
+            self.ads_datas = {}
+            self.ads_datas_path = self.conf["ads"]
+            if os.path.exists(self.ads_datas_path):
+                self.ads_datas = read_pickle(self.ads_datas_path)
+            if len(self.ads_datas) > 0:
+                self.conf = super().load_config()
+                rand_key = ""
+                if self.conf["fixed_ads_id"] != "":
+                    rand_key = self.conf["fixed_ads_id"]
+                else:
+                    rand_num = random.randint(0, len(self.ads_datas) - 1)
+                    keys = list(self.ads_datas.keys())
+                    rand_key = keys[rand_num]
+                    logger.info("rand_num={} rand_key={}".format(rand_num, rand_key))
+                return self.ads_datas[rand_key]
+            else:
+                logger.info("empty movie ads.")
+        except:
+             logger.error("err msg={}".format(traceback.format_exc()))
+        return ""
+ 
+    def get_all_ads(self):
+        self.ads_datas = {}
+        self.ads_datas_path = self.conf["ads"]
+        if os.path.exists(self.ads_datas_path):
+            self.ads_datas = read_pickle(self.ads_datas_path)
+        rets = []
+        for key in self.ads_datas:
+            rets.append("{} ------ {}".format(key, self.ads_datas[key]))
+        if len(rets) == 0:
+            rets.append("暂无可用广告")
+        return "\n".join(rets)
+
     # 额度查询
     def check_limit(self, e_context: EventContext):
         # 获取用户信息，进行充值
@@ -401,4 +540,10 @@ class Movie(Plugin):
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
         help_text += "输入 '加入资源白名单+资源名'， 将资源加入到白名单中\n"
+        help_text += "输入 '开启广告'，开启广告信息\n"
+        help_text += "输入 '关闭广告'，关闭广告信息\n"
+        help_text += "输入 '添加广告+广告内容'，加入广告信息\n"
+        help_text += "输入 '删除广告+广告ID'，删除广告信息\n"
+        help_text += "输入 '固定广告+广告ID'，删除广告信息\n"
+        help_text += "输入 '所有广告'，获取所有广告信息\n"
         return help_text
