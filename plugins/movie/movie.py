@@ -95,7 +95,7 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
 
-        if content.strip() == "你好" or content.strip() == "您好":
+        if content.strip() == "你好" or content.strip() == "您好" or content.strip() == "谢谢" or content.strip() == "多谢":
             return
 
         #if ContextType.TEXT == context.type and "资源充值" in content:
