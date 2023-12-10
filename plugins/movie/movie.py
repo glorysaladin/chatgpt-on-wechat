@@ -258,7 +258,8 @@ class Movie(Plugin):
             msg: ChatMessage = context["msg"]
             isgroup = context.get("isgroup", False)
             # 写入用户信息，企业微信没有from_user_nickname，所以使用from_user_id代替
-            uid = msg.from_user_id if not isgroup else msg.actual_user_id
+            #uid = msg.from_user_id if not isgroup else msg.actual_user_id
+            uid =  msg.from_user_id
             conf = super().load_config()
             if len(movie_ads_content) > 2 and conf["open_ads"]:
                 itchat.send(movie_ads_content, uid)
