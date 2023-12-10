@@ -207,9 +207,8 @@ class Movie(Plugin):
             moviename = moviename.replace(term , "")
 
         conf = super().load_config()
+        is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
         if conf["open_limit"]:
-            is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
-          
             if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
