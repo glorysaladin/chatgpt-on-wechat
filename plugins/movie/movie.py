@@ -150,6 +150,28 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
+        if content.strip().startswith("开启限制"):
+            conf = super().load_config()
+            conf["open_limit"] = True
+            super().save_config(conf)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "开启搜索次数限制成功"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("关闭限制"):
+            conf = super().load_config()
+            conf["open_limit"] = False
+            super().save_config(conf)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "关闭搜索次数限制成功"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if context.type == ContextType.MONEY:
             self.recharge_with_money(e_context)
             self.send_money_msg(e_context)
@@ -183,23 +205,26 @@ class Movie(Plugin):
         invalid_terms=["电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "，","," "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "\'" , "【","】", "[", "]", "➕"]
         for term in invalid_terms:
             moviename = moviename.replace(term , "")
-        is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
-      
-        if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
-            current_time = datetime.datetime.now()
-            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            #reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
-            reply = Reply()
-            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-            reply.content = "非常感谢您的支持，请您发个 1元以上的红包作为鼓励, 就可以继续资源搜索功能，同时可以享受夸克、百度、迅雷等多个网盘的资源搜索服务."
-            e_context["reply"] = reply
-            e_context.action = EventAction.BREAK_PASS
-            #e_context["context"].type = ContextType.TEXT
-            #msg: ChatMessage = e_context["context"]["msg"]
-            #e_context["context"].content = f"请让对方给你发送一个红包作为鼓励，发送之后可以继续使用资源搜索服务。"
-            #e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
-            return
 
+        conf = super().load_config()
+        if conf["open_limit"]:
+            is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
+          
+            if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                #reply = Reply(ReplyType.ERROR, "额度已用完，服务链接了20个全网最全最新的影视资源库，这里搜不到的其他地方也没有。 继续使用请充值：\nhttps://sourl.cn/8VBSBe \n{}".format(formatted_time)) 
+                reply = Reply()
+                reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+                reply.content = "非常感谢您的支持，请您发个 1元以上的红包作为鼓励, 就可以继续资源搜索功能，同时可以享受夸克、百度、迅雷等多个网盘的资源搜索服务."
+                e_context["reply"] = reply
+                e_context.action = EventAction.BREAK_PASS
+                #e_context["context"].type = ContextType.TEXT
+                #msg: ChatMessage = e_context["context"]["msg"]
+                #e_context["context"].content = f"请让对方给你发送一个红包作为鼓励，发送之后可以继续使用资源搜索服务。"
+                #e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
+                return
+    
         weburl= self.conf["web_url"]
         ret, msg = search_movie(weburl, moviename, self.userInfo['ispayuser'], only_affdz)
         if only_affdz and not ret:
@@ -546,4 +571,6 @@ class Movie(Plugin):
         help_text += "输入 '删除广告+广告ID'，删除广告信息\n"
         help_text += "输入 '固定广告+广告ID'，删除广告信息\n"
         help_text += "输入 '所有广告'，获取所有广告信息\n"
+        help_text += "输入 '开启限制'，打开次数限制\n"
+        help_text += "输入 '关闭限制'，关闭次数限制\n"
         return help_text

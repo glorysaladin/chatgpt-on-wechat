@@ -6,5 +6,6 @@
     "movie_whitelist": "/home/lighthouse/project/movie_infos/moviename_whitelist.pkl",
     "ads": "/home/lighthouse/project/movie_infos/movie_ads.pkl",
     "fixed_ads_id": "",
-    "open_ads": true
+    "open_ads": true,
+    "open_limit": false
 }
