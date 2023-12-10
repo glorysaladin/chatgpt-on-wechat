@@ -365,7 +365,7 @@ class Movie(Plugin):
         """
         limit = self.user_datas[user_key]["limit"] if "limit" in self.user_datas[user_key] and self.user_datas[user_key]["limit"] else False
         userInfo['limit'] = limit
-        if self.user_datas[user_key].replace("|", "") == "":
+        if user_key.replace("|", "") == "":
             self.user_datas[user_key]["is_pay_user"] = False
         userInfo['ispayuser'] = self.user_datas[user_key]["is_pay_user"]
         userInfo['search_words'] = self.user_datas[user_key]['search_words']
