@@ -63,7 +63,7 @@ class Movie(Plugin):
         logger.debug("movie={}".format(e_context))
         context = e_context['context']
         content = context.content
-        if context.type == ContextType.MSG_BUSY:
+        if context.type == ContextType.MSG_BUSY or context.type == ContextType.ACCEPT_FRIEND or context.type == ContextType.JOIN_GROUP:
             return
 
         if content == "电影更新":
