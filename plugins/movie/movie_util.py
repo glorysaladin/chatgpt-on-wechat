@@ -10,6 +10,7 @@ import requests
 from .get_pan_from_qianfan import *
 from .get_pan_from_funletu import *
 from .get_pan_from_uukk import *
+from .get_movie_from_tbs import *
 
 headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"}
 
@@ -177,20 +178,27 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
              rets.append("{}\n{}".format(title, link))
              source="1"
 
-    if (len(rets) == 0 or is_pay_user) and  not only_affdz:
-        rets.extend(get_from_funletu(moviename))
-        if len(rets) > 0:
-            source += "2"
+    if not only_affdz:
+        if len(rets) == 0 or is_pay_user :
+            rets.extend(get_tbs_movie(moviename))
+            if len(rets) > 0:
+                source += "w"
 
-    if (len(rets) == 0 or is_pay_user) and not only_affdz:
-        rets.extend(get_from_uukk(moviename, is_pay_user))
-        if len(rets) > 0:
-            source += "3"
+        if len(rets) == 0 or is_pay_user :
+            rets.extend(get_from_funletu(moviename))
+            if len(rets) > 0:
+                source += "2"
 
-    if (len(rets) == 0 or is_pay_user) and not only_affdz:
-        rets.extend(get_from_qianfan(moviename))
-        if len(rets) > 0:
-            source += "4"
+        if len(rets) == 0 or is_pay_user:
+            rets.extend(get_from_uukk(moviename, is_pay_user))
+            if len(rets) > 0:
+                source += "3"
+
+        if len(rets) == 0 or is_pay_user:
+            rets.extend(get_from_qianfan(moviename))
+            if len(rets) > 0:
+                source += "4"
+
     if len(rets) == 0:
         return False, "未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."
 
