@@ -65,6 +65,7 @@ class Movie(Plugin):
         content = context.content
         if context.type == ContextType.MSG_BUSY:
             return
+
         if content == "电影更新":
             conf = super().load_config()
             post_id = conf["post_id"]
@@ -181,7 +182,7 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
 
-        if content.strip() == "你好" or content.strip() == "您好" or content.strip() == "谢谢" or content.strip() == "多谢":
+        if content.strip() == "你好" or content.strip() == "您好" or ("谢谢" in content) or content.strip() == "多谢":
             return
 
         #if ContextType.TEXT == context.type and "资源充值" in content:
@@ -242,7 +243,8 @@ class Movie(Plugin):
                 reply.content += "------------------------------\n"
                 #if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
                 #    reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
-                reply.content += "提示：夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
+                reply.content += "提示：1. 夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
+                reply.content += "2. 资源均源于互联网，仅供交流学习，看完请删除.\n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
                 #if not self.userInfo['isgroup']:
