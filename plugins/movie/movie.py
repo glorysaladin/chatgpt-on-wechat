@@ -182,7 +182,7 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
 
-        if content.strip() == "你好" or content.strip() == "您好" or ("谢谢" in content) or content.strip() == "多谢":
+        if content.strip() == "你好" or content.strip() == "您好" or ("谢谢" in content) or content.strip() == "多谢" or len(content) > 15:
             return
 
         #if ContextType.TEXT == context.type and "资源充值" in content:
@@ -196,7 +196,7 @@ class Movie(Plugin):
             return self.check_limit(e_context)
                 
         only_affdz = True
-        if content.startswith("找") or self.is_whitelist_movie(content):
+        if content.startswith("找") or "找" in content or self.is_whitelist_movie(content):
             only_affdz = False
          
         self.userInfo = self.get_user_info(e_context)
