@@ -200,16 +200,16 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
                 source += "4"
 
     if len(rets) == 0:
-        return False, "未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."
+        return False, ["未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."]
 
     num = len(rets)
     if not is_pay_user:
        rets = rets[0:5]
     else:
        rets = rets[0:20]
-    rets.insert(0, "[{}]找到 {} 个资源:\n".format(source, num))
+    rets.insert(0, "[{}]找到 {} 个相关资源:\n".format(source, num))
 
-    return True, "\n".join(rets)
+    return True, rets
 
 def search_movie(web_url, movie, is_pay_user, only_affdz=False):
     url="{}/search.php?q={}".format(web_url, movie)

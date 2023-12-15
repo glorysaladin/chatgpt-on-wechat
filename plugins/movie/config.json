@@ -5,6 +5,7 @@
     "movie_cards": "/home/lighthouse/project/movie_infos/movie_card_datas.pkl",
     "movie_whitelist": "/home/lighthouse/project/movie_infos/moviename_whitelist.pkl",
     "ads": "/home/lighthouse/project/movie_infos/movie_ads.pkl",
+    "favorite_movie": "/home/lighthouse/project/movie_infos/favorite_movie.pkl",
     "fixed_ads_id": "",
     "open_ads": true,
     "open_limit": false

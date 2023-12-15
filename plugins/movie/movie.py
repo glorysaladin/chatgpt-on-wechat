@@ -53,6 +53,8 @@ class Movie(Plugin):
             if os.path.exists(self.ads_datas_path):
                 self.ads_datas = read_pickle(self.ads_datas_path)
 
+            self.favorite_movie_path = self.conf["favorite_movie"]
+
             logger.info("[movie] daily_limit={} ads_content={}".format(self.conf['daily_limit'], self.ads_content))
             logger.info("[movie] inited")
         except:
@@ -173,6 +175,33 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
+        if content.strip().startswith("添加推荐资源"):
+            self.add_favorite_movie(e_context)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"添加推荐资源成功."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("删除推荐资源"):
+            self.del_favorite_movie(e_context)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"删除推荐资源成功."
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content.strip().startswith("所有推荐资源"):
+            all_favorite_movies = self.get_all_favorite_movies()
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = all_favorite_movies
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if context.type == ContextType.MONEY:
             self.recharge_with_money(e_context)
             self.send_money_msg(e_context)
@@ -226,13 +255,21 @@ class Movie(Plugin):
                 return
     
         weburl= self.conf["web_url"]
-        ret, msg = search_movie(weburl, moviename, self.userInfo['ispayuser'], only_affdz)
+        ret, movie_results = search_movie(weburl, moviename, self.userInfo['ispayuser'], only_affdz)
+
+        # 大家都在找
+        favorite_movies = self.get_favorite_movie(moviename)
+        if len(favorite_movies) > 0:
+            movie_results .append("\n----------大家都在找----------")
+            movie_results.extend(favorite_movies)
+        
         if only_affdz and not ret:
             return
         else:
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-            reply.content = f"{msg}"
+            movie_msg = "\n".join(movie_results)
+            reply.content = f"{movie_msg}"
             if ret:
                 if is_new_movie:
                     self.user_datas[self.userInfo['user_key']]["limit"] -= 1
@@ -240,7 +277,7 @@ class Movie(Plugin):
                     write_pickle(self.user_datas_path, self.user_datas)
 
                 reply.content += "\n\n"
-                reply.content += "------------------------------\n"
+                reply.content += "--------------------------------\n"
                 #if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
                 #    reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
                 reply.content += "提示：\n1. 夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
@@ -567,6 +604,56 @@ class Movie(Plugin):
                 break
         return is_new
 
+    def get_all_favorite_movies(self):
+        favorite_movie_datas = {}
+        if os.path.exists(self.favorite_movie_path):
+            favorite_movie_datas = read_pickle(self.favorite_movie_path)
+        rets = []
+        for key in favorite_movie_datas:
+            rets.append(key)
+        if len(rets) == 0:
+            rets.append("暂无推荐资源")
+        return "\n".join(rets)
+
+
+    def add_favorite_movie(self, e_context: EventContext):
+        favorite_movie_datas = {}
+        if os.path.exists(self.favorite_movie_path):
+            favorite_movie_datas = read_pickle(self.favorite_movie_path)
+
+        content = e_context['context'].content
+        movie_name = content.replace("添加推荐资源", "")
+
+        weburl= self.conf["web_url"]
+        ret, movie_results = search_movie(weburl, movie_name, False, True)
+        if ret:
+            favorite_movie_datas[movie_name] = "\n".join(movie_results[1:])
+            write_pickle(self.favorite_movie_path, favorite_movie_datas)
+
+    def del_favorite_movie(self, e_context: EventContext):
+        favorite_movie_datas = {}
+        if os.path.exists(self.favorite_movie_path):
+            favorite_movie_datas = read_pickle(self.favorite_movie_path)
+
+        content = e_context['context'].content
+        movie_name = content.replace("删除推荐资源", "")
+
+        try:
+            del favorite_movie_datas[movie_name]
+            write_pickle(self.favorite_movie_path, favorite_movie_datas)
+        except:
+            pass
+
+    def get_favorite_movie(self, moviename):
+        favorite_movie_datas = {}
+        if os.path.exists(self.favorite_movie_path):
+            favorite_movie_datas = read_pickle(self.favorite_movie_path)
+        rets = []
+        for key in favorite_movie_datas:
+            if key != moviename:
+                rets.append("{}".format(favorite_movie_datas[key]))
+        return rets 
+
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
@@ -580,4 +667,7 @@ class Movie(Plugin):
         help_text += "输入 '所有广告'，获取所有广告信息\n"
         help_text += "输入 '开启限制'，打开次数限制\n"
         help_text += "输入 '关闭限制'，关闭次数限制\n"
+        help_text += "输入 '添加推荐资源+资源名'，加入推荐资源列表\n"
+        help_text += "输入 '删除推荐资源+资源名'，从推荐资源列表删除\n"
+        help_text += "输入 '所有推荐资源'，获取所有推荐列表\n"
         return help_text
