@@ -50,8 +50,6 @@ def movie_page(movie_url):
     urls = []
     try:
         video_download_link_info = bodyNode.find("div", attrs={"class":"video_download_link_info"})
-        if video_download_link_info is None:
-            print("bodyNode=", bodyNode)
         items = video_download_link_info.find_all("div", attrs={"class":"video_download_link_item"})
         for item in items:
             video_download_link_name = item.find("div", attrs={"class":"video_download_link_name"})
@@ -59,7 +57,7 @@ def movie_page(movie_url):
             if video_link_node.has_attr("href"):
                 urls.append(video_link_node["href"])
     except:
-        print("error********", traceback.format_exc(), movie_url, bodyNode)
+        print("error********", traceback.format_exc(), movie_url)
     return urls
 
 def get_tbs_movie(movie_name):
@@ -80,8 +78,6 @@ def get_tbs_movie(movie_name):
     rets = []
     try:
         search_result_list = bodyNode.find('div', attrs={"class":"search_result_list"})
-        if search_result_list is None:
-            print("main page bodyNode={}".format(bodyNode))
         search_result_items = search_result_list.find_all("div", attrs={"class":"search_result_item"})
         for search_item in search_result_items:
             search_result_title = search_item.find("a", attrs={"class":"search_result_title"}) 
@@ -105,7 +101,7 @@ def get_tbs_movie(movie_name):
             if len(rets) > 5:
                 break
     except:
-        print("*(***&^*&^*", traceback.format_exc(), bodyNode)
+        print("*(***&^*&^*", traceback.format_exc())
     if len(rets) > 0:
         rets.insert(0, "如果打不开，请复制链接到浏览器观看, 不要相信视频里的广告!!!\n")
     return rets
