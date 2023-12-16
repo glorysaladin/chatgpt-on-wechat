@@ -63,30 +63,33 @@ def get_tbs_movie(movie_name):
     htmlNode = soup.html
     headNode = htmlNode.head
     bodyNode = htmlNode.body
-    search_result_list = bodyNode.find('div', attrs={"class":"search_result_list"})
-    search_result_items = search_result_list.find_all("div", attrs={"class":"search_result_item"})
     rets = []
-    for search_item in search_result_items:
-        search_result_title = search_item.find("a", attrs={"class":"search_result_title"}) 
-        url = BASE_URL+search_result_title["href"]
-        title = search_result_title.text.strip()
-        search_issue_date = search_item.find("span", attrs={"class":"search_result_issue_date"})
-        date=""
-        if search_issue_date is not None:
-            date = search_issue_date.text.strip()
-        label_node = search_item.find("div", attrs={"class":"video_labels"})
-        labels = [] 
-        if label_node is not None:
-            video_spans = label_node.find_all("span")
-            for video_span in video_spans:
-                labels.append(video_span.text.strip())
-        if "video" not in url or not good_match(title, movie_name):
-            continue
-        movie_urls = movie_page(url)
-        if len(movie_urls) > 0:
-            rets.append("{}{} {}\n{}".format(title, date, ",".join(labels), "\n".join(movie_urls[0:5])))
-        if len(rets) > 5:
-            break
+    try:
+        search_result_list = bodyNode.find('div', attrs={"class":"search_result_list"})
+        search_result_items = search_result_list.find_all("div", attrs={"class":"search_result_item"})
+        for search_item in search_result_items:
+            search_result_title = search_item.find("a", attrs={"class":"search_result_title"}) 
+            url = BASE_URL+search_result_title["href"]
+            title = search_result_title.text.strip()
+            search_issue_date = search_item.find("span", attrs={"class":"search_result_issue_date"})
+            date=""
+            if search_issue_date is not None:
+                date = search_issue_date.text.strip()
+            label_node = search_item.find("div", attrs={"class":"video_labels"})
+            labels = [] 
+            if label_node is not None:
+                video_spans = label_node.find_all("span")
+                for video_span in video_spans:
+                    labels.append(video_span.text.strip())
+            if "video" not in url or not good_match(title, movie_name):
+                continue
+            movie_urls = movie_page(url)
+            if len(movie_urls) > 0:
+                rets.append("{}{} {}\n{}".format(title, date, ",".join(labels), "\n".join(movie_urls[0:5])))
+            if len(rets) > 5:
+                break
+    except:
+        pass
     if len(rets) > 0:
         rets.insert(0, "如果打不开，请复制链接到浏览器观看, 不要相信视频里的广告!!!\n")
     return rets
