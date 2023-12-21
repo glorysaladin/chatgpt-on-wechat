@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import subprocess, json, os
+import traceback
 
 def good_match(s1, s2):
     set1 = set(s1)
@@ -22,27 +23,30 @@ def get_from_uukk(query, is_pay_user):
     return rets
 
 def search(query, url):
-    curdir = os.path.dirname(os.path.abspath(__file__))
-    shell_cmd =  "sh {}/curl_uukk.sh {} {} \"{}\"".format(curdir, query, url, COOKIE)
-    print(shell_cmd)
-    return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
     rets =[]
-    if return_cmd.returncode == 0:
-        ret_val = return_cmd.stdout
-        js = json.loads(ret_val)
-        for item in js["list"]:
-            question=item['question']
-            answer=item["answer"]
-            if "失效" in question:
-                continue
-            answer = answer.replace(question, "")
-            answer = answer.replace("\n链接：", "\n")
-            answer = answer.replace("链接：", "\n")
-            answer = answer.replace("链接:", "\n")
-            if good_match(query, question):
-                tmp="{}\n{}".format(question, answer)
-                tmp = tmp.replace("\n\n", "\n")
-                rets.append(tmp)
+    try:
+        curdir = os.path.dirname(os.path.abspath(__file__))
+        shell_cmd =  "sh {}/curl_uukk.sh {} {} \"{}\"".format(curdir, query, url, COOKIE)
+        print(shell_cmd)
+        return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
+        if return_cmd.returncode == 0:
+            ret_val = return_cmd.stdout
+            js = json.loads(ret_val)
+            for item in js["list"]:
+                question=item['question']
+                answer=item["answer"]
+                if "失效" in question:
+                    continue
+                answer = answer.replace(question, "")
+                answer = answer.replace("\n链接：", "\n")
+                answer = answer.replace("链接：", "\n")
+                answer = answer.replace("链接:", "\n")
+                if good_match(query, question):
+                    tmp="{}\n{}".format(question, answer)
+                    tmp = tmp.replace("\n\n", "\n")
+                    rets.append(tmp)
+    except:
+        print(traceback.format_exc())
     return rets
 
 print(get_from_uukk("以爱为营", True))
