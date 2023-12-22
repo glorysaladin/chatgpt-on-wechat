@@ -540,7 +540,7 @@ class Movie(Plugin):
         content = e_context['context'].content
         content = content.replace("固定广告", "")
         self.conf["fixed_ads_id"] = content.strip()
-        super().save_config(conf)
+        super().save_config(self.conf)
 
     def get_rand_ads(self):
         try:
@@ -663,7 +663,7 @@ class Movie(Plugin):
         help_text += "输入 '关闭广告'，关闭广告信息\n"
         help_text += "输入 '添加广告+广告内容'，加入广告信息\n"
         help_text += "输入 '删除广告+广告ID'，删除广告信息\n"
-        help_text += "输入 '固定广告+广告ID'，删除广告信息\n"
+        help_text += "输入 '固定广告+广告ID'，固定某个广告信息\n"
         help_text += "输入 '所有广告'，获取所有广告信息\n"
         help_text += "输入 '开启限制'，打开次数限制\n"
         help_text += "输入 '关闭限制'，关闭次数限制\n"
