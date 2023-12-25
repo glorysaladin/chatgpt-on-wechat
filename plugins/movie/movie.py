@@ -283,6 +283,7 @@ class Movie(Plugin):
                 reply.content += "提示：\n1. 夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
                 reply.content += "2. 不能保证都可以观看，自己试.\n"
                 reply.content += "3. 资源均源于互联网，仅供交流学习，看完请删除.\n"
+                reply.content += "4. 夸克网盘空间不够，激活VIP看这里 https://sourl.cn/vAxErZ \n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
                 #if not self.userInfo['isgroup']:
@@ -540,7 +541,7 @@ class Movie(Plugin):
         content = e_context['context'].content
         content = content.replace("固定广告", "")
         self.conf["fixed_ads_id"] = content.strip()
-        super().save_config(conf)
+        super().save_config(self.conf)
 
     def get_rand_ads(self):
         try:
@@ -663,7 +664,7 @@ class Movie(Plugin):
         help_text += "输入 '关闭广告'，关闭广告信息\n"
         help_text += "输入 '添加广告+广告内容'，加入广告信息\n"
         help_text += "输入 '删除广告+广告ID'，删除广告信息\n"
-        help_text += "输入 '固定广告+广告ID'，删除广告信息\n"
+        help_text += "输入 '固定广告+广告ID'，固定某个广告信息\n"
         help_text += "输入 '所有广告'，获取所有广告信息\n"
         help_text += "输入 '开启限制'，打开次数限制\n"
         help_text += "输入 '关闭限制'，关闭次数限制\n"
