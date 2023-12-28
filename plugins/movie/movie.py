@@ -144,6 +144,16 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
+        if content.strip().startswith("群发广告"):
+            self.set_fixed_ad_id(e_context)
+            group_ads_content = self.get_ads(e_context)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = group_ads_content
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if content.strip().startswith("所有广告"):
             all_ads = self.get_all_ads()
             reply = Reply()  # 创建回复消息对象
@@ -283,7 +293,7 @@ class Movie(Plugin):
                 reply.content += "提示：\n1. 夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
                 reply.content += "2. 不能保证都可以观看，自己试.\n"
                 reply.content += "3. 资源均源于互联网，仅供交流学习，看完请删除.\n"
-                reply.content += "4. 夸克网盘空间不够，激活VIP看这里 https://sourl.cn/vAxErZ \n"
+                reply.content += "4. ❤️夸克网盘及各大app会员，激活VIP看这里 https://sourl.cn/vAxErZ \n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
                 #if not self.userInfo['isgroup']:
@@ -536,6 +546,22 @@ class Movie(Plugin):
         except:
             pass
 
+    def get_ads(self, e_context: EventContext):
+        self.ads_datas = {}
+        self.ads_datas_path = self.conf["ads"]
+        if os.path.exists(self.ads_datas_path):
+            self.ads_datas = read_pickle(self.ads_datas_path)
+        content = e_context['context'].content
+        content = content.replace("群发广告", "")
+        group_ads_content = ""
+        try:
+            group_ads_content = self.ads_datas[content.strip()]
+            #write_pickle(self.ads_datas_path, self.ads_datas)
+        except:
+            pass
+        return group_ads_content
+
+
     def set_fixed_ad_id(self, e_context: EventContext):
         self.conf = super().load_config()
         content = e_context['context'].content
@@ -573,7 +599,7 @@ class Movie(Plugin):
             self.ads_datas = read_pickle(self.ads_datas_path)
         rets = []
         for key in self.ads_datas:
-            rets.append("{} ------ {}".format(key, self.ads_datas[key]))
+            rets.append("{} --- {}".format(key, self.ads_datas[key]))
         if len(rets) == 0:
             rets.append("暂无可用广告")
         return "\n".join(rets)
@@ -660,6 +686,7 @@ class Movie(Plugin):
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
         help_text += "输入 '加入资源白名单+资源名'， 将资源加入到白名单中\n"
+        help_text += "输入 '群发广告+广告ID'，群发广告信息\n"
         help_text += "输入 '开启广告'，开启广告信息\n"
         help_text += "输入 '关闭广告'，关闭广告信息\n"
         help_text += "输入 '添加广告+广告内容'，加入广告信息\n"
