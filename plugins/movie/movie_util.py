@@ -194,10 +194,10 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
             if len(rets) > 0:
                 source += "3"
 
-        if len(rets) == 0 or is_pay_user:
-            rets.extend(get_from_qianfan(moviename))
-            if len(rets) > 0:
-                source += "4"
+        #if len(rets) == 0 or is_pay_user:
+        #    rets.extend(get_from_qianfan(moviename))
+        #    if len(rets) > 0:
+        #        source += "4"
 
     if len(rets) == 0:
         return False, ["未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."]
