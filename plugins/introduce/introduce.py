@@ -79,7 +79,7 @@ class Introduce(Plugin):
             msg: ChatMessage = e_context["context"]["msg"]
             logger.info(f"start to welcome {msg.from_user_nickname}.")
             #e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以 找资源名 格式找资源, 并用 找还珠格格 举例, 建议他收藏我方便以后查找资源, 发送信息太多的时候会被微信限制发信息，这时候我会开启好友验证，如果显示你不是我的好友，请重新添加我一次。最后添加一句随机的祝福语。上面的欢迎语要控制在50个字以内。'
-            e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以 找资源名 格式找资源, 并用 找还珠格格 举例。频繁发送消息会被微信限制，如果我开启好友验证，可能会显示他不是我的好友，那么请他重新添加我一次；建议他收藏我方便以后查找资源,。最后祝他观影愉快。'
+            e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以 找资源名 格式找资源, 并用 找还珠格格 举例。建议他收藏我方便以后查找资源。最后发一句日常的祝福语。'
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
            
