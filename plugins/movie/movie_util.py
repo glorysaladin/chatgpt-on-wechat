@@ -169,6 +169,8 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
         title = ""
         if item.has_key("title") and item.has_key('href'):
              href = item['href']
+             if "post" not in href:
+                 continue
              title = item['title'].replace("<strong>", "").replace("</strong>", "")
         if good_match(moviename, title):
              movieurl = href
