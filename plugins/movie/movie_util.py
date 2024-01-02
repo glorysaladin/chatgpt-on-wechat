@@ -12,6 +12,7 @@ from .get_pan_from_funletu import *
 from .get_pan_from_uukk import *
 #from .get_movie_from_tbs import *
 from .get_movie_from_soupian import *
+from .get_movie_from_zhuiyingmao import *
 
 headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"}
 
@@ -183,10 +184,15 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
 
     if not only_affdz:
         if len(rets) == 0 or is_pay_user :
+            rets.extend(get_zhuiyingmao_movie(moviename))
+            if len(rets) > 0:
+                source += "a"
+
+        if len(rets) == 0 or is_pay_user :
             #rets.extend(get_tbs_movie(moviename))
             rets.extend(get_soupian_movie(moviename))
             if len(rets) > 0:
-                source += "w"
+                source += "b"
 
         if len(rets) == 0 or is_pay_user :
             rets.extend(get_from_funletu(moviename))

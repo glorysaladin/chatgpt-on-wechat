@@ -147,7 +147,7 @@ def get_from_qianfan(query):
       if ret is not None:
           final_rets.append(ret)
     return final_rets
-print(get_from_qianfan("以爱为营"))
+#print(get_from_qianfan("以爱为营"))
 #movie_url='https://pan.qianfan.app/share/eyJtb2RlbCI6ImFsaXl1bmRyaXZlaW5mbyIsImlkIjoyNDUyODR9:omcB1Y52cd76ANQ3RGq8TkBXtKOlBKQQOyVWfWhNZT4'
 #movie_url='https://pan.qianfan.app/share/eyJtb2RlbCI6ImFsaXl1bmRyaXZlaW5mbyIsImlkIjozMjA1NDh9:PZW0AMTvyH3Vv8BsAIr-1eQocRzrVipwNpZgHcp6xX4/'
 #query="你好李焕英"
