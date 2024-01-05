@@ -294,7 +294,7 @@ class Movie(Plugin):
                 reply.content += "2. 不能保证都可以观看，自己试.\n"
                 reply.content += "3. 资源均源于互联网，仅供交流学习，看完请删除.\n"
                 #reply.content += "4. ❤️夸克网盘及各大app会员，激活VIP看这里 https://sourl.cn/vAxErZ \n"
-                reply.content += "4. ❤️ 各种正经和不正经的小说,看这里 https://sourl.cn/Bkt6yg \n"
+                #reply.content += "4. ❤️ 各种正经和不正经的小说,看这里 https://sourl.cn/Bkt6yg \n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
                 #reply.content += "[爱心]邀请我进其他群，服务更多伙伴🌹\n"
                 #if not self.userInfo['isgroup']:

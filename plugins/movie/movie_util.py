@@ -188,11 +188,11 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
             if len(rets) > 0:
                 source += "a"
 
-        if len(rets) == 0 or is_pay_user :
+        #if len(rets) == 0 or is_pay_user :
             #rets.extend(get_tbs_movie(moviename))
-            rets.extend(get_soupian_movie(moviename))
-            if len(rets) > 0:
-                source += "b"
+            #rets.extend(get_soupian_movie(moviename))
+            #if len(rets) > 0:
+            #    source += "b"
 
         if len(rets) == 0 or is_pay_user :
             rets.extend(get_from_funletu(moviename))
