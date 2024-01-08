@@ -8,15 +8,13 @@ import logging.handlers
 import traceback
 import urllib
 import requests
-#from .get_pan_from_qianfan import *
-#from .get_pan_from_funletu import *
+
+cur_dir=os.path.dirname(__file__)
+sys.path.append(cur_dir)
+
 from get_pan_from_funletu import *
-#from .get_pan_from_uukk import *
 from get_pan_from_uukk import *
-#from .get_movie_from_tbs import *
-#from .get_movie_from_soupian import *
 from get_movie_from_soupian import *
-#from .get_movie_from_zhuiyingmao import *
 from get_movie_from_zhuiyingmao import *
 
 headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"}
@@ -259,11 +257,11 @@ def check_update():
         for item in values:
             if item[0] is not None:
                 movie_series.append((item[0], str(item[1]).replace("集", "")))
-    print(movie_series)
+    #print(movie_series)
     for moviename, my_count in movie_series:
         rets = []
         fuletu_rets = get_from_funletu(moviename)
-        print("query=", moviename, "fuletu_rets=", fuletu_rets)
+        #print("query=", moviename, "fuletu_rets=", fuletu_rets)
         rets.extend(fuletu_rets)
         uukk_rets = get_from_uukk(moviename, True)
         rets.extend(uukk_rets)

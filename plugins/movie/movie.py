@@ -85,6 +85,15 @@ class Movie(Plugin):
             super().save_config(conf)
             e_context.action = EventAction.BREAK_PASS
 
+        if content == "检查更新":
+            msg = check_update()
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"{msg}"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if content.strip().startswith("加入资源白名单"):
             content = content.replace("加入资源白名单","")
             self.add_movie_to_whitelist(content.strip())
@@ -96,10 +105,10 @@ class Movie(Plugin):
             return
 
         if content.strip().startswith("添加广告"):
-            self.add_ads(e_context)
+            ads_id = self.add_ads(e_context)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-            reply.content = f"添加广告成功."
+            reply.content = f"添加广告成功 {ads_id}"
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS
             return
@@ -533,6 +542,7 @@ class Movie(Plugin):
         content = content.replace("添加广告", "")
         self.ads_datas[rand_num] = content 
         write_pickle(self.ads_datas_path, self.ads_datas)
+        return rand_num
 
     def del_ads(self, e_context: EventContext):
         self.ads_datas = {}
@@ -685,6 +695,7 @@ class Movie(Plugin):
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
+        help_text += "输入 '检查更新'， 获检查关注的资源是不是有更新\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
         help_text += "输入 '加入资源白名单+资源名'， 将资源加入到白名单中\n"
         help_text += "输入 '群发广告+广告ID'，群发广告信息\n"
