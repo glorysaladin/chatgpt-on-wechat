@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys, re, os, time, json
+import sys, re, os, time, json, re
+from datetime import datetime
 import html5lib
 from bs4 import BeautifulSoup
 import logging
@@ -8,11 +9,15 @@ import traceback
 import urllib
 import requests
 #from .get_pan_from_qianfan import *
-from .get_pan_from_funletu import *
-from .get_pan_from_uukk import *
+#from .get_pan_from_funletu import *
+from get_pan_from_funletu import *
+#from .get_pan_from_uukk import *
+from get_pan_from_uukk import *
 #from .get_movie_from_tbs import *
-from .get_movie_from_soupian import *
-from .get_movie_from_zhuiyingmao import *
+#from .get_movie_from_soupian import *
+from get_movie_from_soupian import *
+#from .get_movie_from_zhuiyingmao import *
+from get_movie_from_zhuiyingmao import *
 
 headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"}
 
@@ -226,6 +231,59 @@ def search_movie(web_url, movie, is_pay_user, only_affdz=False):
     resp = requests.get(url, headers=headers)
     return _get_search_result(resp.text, movie, is_pay_user, only_affdz)
 
+def need_update(my_count, other_count):
+    if "." in my_count and "." in other_count:
+        # 将日期字符串转换为datetime对象
+        date1_obj = datetime.strptime(str(my_count), "%m.%d")
+        date2_obj = datetime.strptime(str(other_count), "%m.%d")
+        if date1_obj < date2_obj:
+            return True
+        return False
+    else:
+        if "." not in my_count and "." not in other_count:
+            if int(my_count) < int(other_count):
+                return True
+            return False
+    return False
+
+def check_update():
+    update_infos=[]
+    curdir=os.path.dirname(os.path.abspath(__file__))
+    shell_cmd =  "sh {}/get_state_from_feishu.sh".format(curdir)
+    return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
+    movie_series =[]
+    if return_cmd.returncode == 0:
+        ret_val = return_cmd.stdout
+        js = json.loads(ret_val)
+        values = js.get("data", {}).get("valueRange", {}).get("values", [])
+        for item in values:
+            if item[0] is not None:
+                movie_series.append((item[0], str(item[1]).replace("集", "")))
+    print(movie_series)
+    for moviename, my_count in movie_series:
+        rets = []
+        fuletu_rets = get_from_funletu(moviename)
+        print("query=", moviename, "fuletu_rets=", fuletu_rets)
+        rets.extend(fuletu_rets)
+        uukk_rets = get_from_uukk(moviename, True)
+        rets.extend(uukk_rets)
+        for ret in rets:
+            try:
+                if "quark" not in ret:
+                    continue
+                items = ret.strip().split("\n")
+                if len(items) >= 2:
+                    cur_name = items[0]
+                    pattern = r"[更|全]\D*(\d+\.?\d*)"
+                    matches = re.findall(pattern, cur_name)
+                    for match in matches:
+                        if need_update(my_count, match):
+                            #print("debug", "ret=", ret, "match=", match, "my_ount=", my_count, "*******")
+                            update_infos.append("【{}】\n当前【{}】--> 最新 【{}】 \n{}\n".format(moviename, my_count, match, ret))
+            except:
+                print("error", ret)
+    return "\n".join(update_infos)
+print(check_update())
 #print(get_movie_update(1414))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))

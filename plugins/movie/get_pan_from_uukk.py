@@ -12,7 +12,9 @@ def good_match(s1, s2):
 
 COOKIE="Hm_lvt_cce07f87930c14786d9eced9c08d0e89=1700320320,1700750079,1701444675; Hm_lpvt_cce07f87930c14786d9eced9c08d0e89=1701964941"
 #URLS=["http://uukk6.cn/v/api/getJuzi", "http://uukk6.cn/v/api/getDyfx", "http://uukk6.cn/v/api/getTTZJB"]
-URLS=["http://uukk6.cn/v/api/getJuzi", "http://uukk6.cn/v/api/getTTZJB"]
+#URLS=["http://uukk6.cn/v/api/getJuzi", "http://uukk6.cn/v/api/getTTZJB"]
+#URLS=["http://22006.cn/v/api/getJuzi", "http://22006.cn/v/api/getpwdcfg", "http://22006.cn/v/api/getDyfx", "http://22006.cn/v/api/getTTZJB"]
+URLS=["http://22006.cn/v/api/getJuzi", "http://22006.cn/v/api/getDyfx", "http://22006.cn/v/api/getTTZJB"]
 
 def get_from_uukk(query, is_pay_user):
     rets = []
@@ -49,4 +51,4 @@ def search(query, url):
         print(traceback.format_exc())
     return rets
 
-print(get_from_uukk("以爱为营", True))
+print(get_from_uukk("繁花", True))
