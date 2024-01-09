@@ -74,11 +74,12 @@ class Introduce(Plugin):
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS 
 
-        if content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
+        if  content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
+            self.send_favorite_movie(e_context)
+
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
             logger.info(f"start to welcome {msg.from_user_nickname}.")
-            #e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以 找资源名 格式找资源, 并用 找还珠格格 举例, 建议他收藏我方便以后查找资源, 发送信息太多的时候会被微信限制发信息，这时候我会开启好友验证，如果显示你不是我的好友，请重新添加我一次。最后添加一句随机的祝福语。上面的欢迎语要控制在50个字以内。'
             e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以 找资源名 格式找资源, 并用 找还珠格格 举例。建议他收藏我方便以后查找资源。最后发一句日常的祝福语。'
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
@@ -118,7 +119,33 @@ class Introduce(Plugin):
             send2(comments[-1], e_context, ReplyType.TEXT)
             self.ent_datas[key]["is_used"] = True
             write_pickle(ent_data_path, self.ent_datas)
-         
+    
+    def send_favorite_movie(self, e_context: EventContext):
+        context = e_context['context']
+        isgroup = context.get("isgroup", False)
+        self.favorite_movie_path = self.conf["favorite_movie"] 
+        favorite_movie_datas = {}
+        if os.path.exists(self.favorite_movie_path):
+            favorite_movie_datas = read_pickle(self.favorite_movie_path)
+        rets = []
+        for key in favorite_movie_datas:
+            rets.append("{}".format(favorite_movie_datas[key]))
+        if len (rets) > 0:
+            rets.append("----------------------------")
+            rets.append("提示：\n1. 夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.")
+            rets.append("2. 不能保证都可以观看，自己试.")
+            rets.append("3. 资源均源于互联网，仅供交流学习，看完请删除.")
+            if not isgroup:
+                rets.append("4. ‼️进资源群，海量资源免费： https://sourl.cn/m2ut6M ")
+            rets.insert(0, "-------热门资源推荐--------")
+        if len(rets) > 0:
+            msg: ChatMessage = context["msg"]
+            uid = msg.from_user_id if not isgroup else msg.actual_user_id
+            try:
+                itchat.send("\n".join(rets), uid)
+            except:
+                print("uid={}".format(uid), traceback.format_exc())
+    
     def send_busy_notice(self, e_context: EventContext):
         context = e_context['context']
         msg: ChatMessage = context["msg"]

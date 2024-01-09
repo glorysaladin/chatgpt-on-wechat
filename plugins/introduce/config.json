@@ -1,4 +1,5 @@
 {
     "interval": 10,
-    "accept_friend_msg": true
+    "accept_friend_msg": true,
+    "favorite_movie": "/home/lighthouse/project/movie_infos/favorite_movie.pkl"
 }
