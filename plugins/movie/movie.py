@@ -289,6 +289,7 @@ class Movie(Plugin):
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             movie_msg = "\n".join(movie_results)
             reply.content = f"{movie_msg}"
+            isgroup = context.get("isgroup", False)
             if ret:
                 if is_new_movie:
                     self.user_datas[self.userInfo['user_key']]["limit"] -= 1
@@ -302,6 +303,8 @@ class Movie(Plugin):
                 reply.content += "提示：\n1. 夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
                 reply.content += "2. 不能保证都可以观看，自己试.\n"
                 reply.content += "3. 资源均源于互联网，仅供交流学习，看完请删除.\n"
+                if not isgroup:
+                    reply.content += "4. ‼️进资源群，海量资源免费： https://sourl.cn/m2ut6M \n"
                 #reply.content += "4. ❤️夸克网盘及各大app会员，激活VIP看这里 https://sourl.cn/vAxErZ \n"
                 #reply.content += "4. ❤️ 各种正经和不正经的小说,看这里 https://sourl.cn/Bkt6yg \n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"
@@ -317,7 +320,6 @@ class Movie(Plugin):
             movie_ads_content = self.get_rand_ads() 
 
             msg: ChatMessage = context["msg"]
-            isgroup = context.get("isgroup", False)
             # 写入用户信息，企业微信没有from_user_nickname，所以使用from_user_id代替
             #uid = msg.from_user_id if not isgroup else msg.actual_user_id
             uid =  msg.from_user_id

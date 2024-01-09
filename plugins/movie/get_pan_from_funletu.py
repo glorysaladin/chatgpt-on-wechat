@@ -12,7 +12,7 @@ def good_match(s1, s2):
 def get_from_funletu(query):
     curdir=os.path.dirname(os.path.abspath(__file__))
     shell_cmd =  "sh {}/curl_funletu.sh {}".format(curdir, query)
-    print(shell_cmd)
+   # print(shell_cmd)
     return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
     rets =[]
     if return_cmd.returncode == 0:

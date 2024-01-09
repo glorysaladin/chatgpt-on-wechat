@@ -482,8 +482,7 @@ class timetask(Plugin):
             #内容描述
             if self.conf.get("is_need_detailDeccription_whenNormalReply", True):
                 reply_text += f"【任务详情】："
-
-            reply_text += eventStr
+                reply_text += eventStr
             replyType = ReplyType.TEXT
                 
         #消息回复

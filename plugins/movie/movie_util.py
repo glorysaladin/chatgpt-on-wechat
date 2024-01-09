@@ -186,10 +186,10 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
              source="1"
 
     if not only_affdz:
-        if len(rets) == 0 or is_pay_user :
-            rets.extend(get_zhuiyingmao_movie(moviename))
-            if len(rets) > 0:
-                source += "a"
+        #if len(rets) == 0 or is_pay_user :
+        #    rets.extend(get_zhuiyingmao_movie(moviename))
+        #    if len(rets) > 0:
+        #        source += "a"
 
         #if len(rets) == 0 or is_pay_user :
             #rets.extend(get_tbs_movie(moviename))
@@ -257,7 +257,7 @@ def check_update():
         for item in values:
             if item[0] is not None:
                 movie_series.append((item[0], str(item[1]).replace("集", "")))
-    #print(movie_series)
+    print("movie_series={}".format(movie_series))
     for moviename, my_count in movie_series:
         rets = []
         fuletu_rets = get_from_funletu(moviename)
@@ -280,6 +280,9 @@ def check_update():
                             update_infos.append("【{}】\n当前【{}】--> 最新 【{}】 \n{}\n".format(moviename, my_count, match, ret))
             except:
                 print("error", ret)
+    if len(update_infos) > 0:
+       url="https://vqaf8mnvaxw.feishu.cn/sheets/Uz9tsZ7fHhV3Fgt7jWMcBl8VnNg?sheet=47b15e"
+       update_infos.insert(0, "【有资源需要更新】\n{}\n".format(url))
     return "\n".join(update_infos)
 print(check_update())
 #print(get_movie_update(1414))

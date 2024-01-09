@@ -29,7 +29,7 @@ def search(query, url):
     try:
         curdir = os.path.dirname(os.path.abspath(__file__))
         shell_cmd =  "sh {}/curl_uukk.sh {} {} \"{}\"".format(curdir, query, url, COOKIE)
-        print(shell_cmd)
+        #print(shell_cmd)
         return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
         if return_cmd.returncode == 0:
             ret_val = return_cmd.stdout
