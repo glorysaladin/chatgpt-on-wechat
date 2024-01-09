@@ -8,6 +8,7 @@ import logging.handlers
 import traceback
 import urllib
 import requests
+import random
 
 cur_dir=os.path.dirname(__file__)
 sys.path.append(cur_dir)
@@ -74,23 +75,31 @@ def _extract_movie_info(httpDoc, pattern='json'):
     return title_postid_map
 
 def get_source_link(url):
-    resp = requests.get(url, headers=headers)
-    httpDoc = resp.text
-    soup = None
+    title_text = ""
     try:
-        soup = BeautifulSoup(httpDoc, 'html5lib')
+        resp = requests.get(url, headers=headers)
+        httpDoc = resp.text
+        soup = None
+        try:
+            soup = BeautifulSoup(httpDoc, 'html5lib')
+        except:
+            soup = BeautifulSoup(httpDoc, 'html.parser')
+        htmlNode = soup.html
+        headNode = htmlNode.head
+        bodyNode = htmlNode.body
+        itemNodes = bodyNode.find_all(attrs={"class": "sou-con"})
+        titleNode = bodyNode.find('h1', attrs={"class": "detail_title"})
+        if titleNode is not None:
+            title_text = titleNode.text
+
+        contentNode = bodyNode.find('div', attrs={"class":"article-content"})
+        sourceLinks = contentNode.find_all('a')
+        for link in sourceLinks:
+            if "http" in link["href"]:
+                return link["href"], title_text
     except:
-        soup = BeautifulSoup(httpDoc, 'html.parser')
-    htmlNode = soup.html
-    headNode = htmlNode.head
-    bodyNode = htmlNode.body
-    itemNodes = bodyNode.find_all(attrs={"class": "sou-con"})
-    contentNode = bodyNode.find('div', attrs={"class":"article-content"})
-    sourceLinks = contentNode.find_all('a')
-    for link in sourceLinks:
-        if "http" in link["href"]:
-            return link["href"]
-    return ""
+        print(traceback.format_exc())
+    return "", title_text
 
 def get_movie_update(last_post_id):
     rets = {}
@@ -134,7 +143,7 @@ def get_movie_update(last_post_id):
         exist_map[movie]=1
         link = ""
         if movie in rets:
-            link = get_source_link(rets[movie])
+            link, title_text = get_source_link(rets[movie])
             if link == "":
                 link = rets[movie]
         message_list.append("{}: {}\n链接: {}".format(idx, movie, link))
@@ -148,6 +157,15 @@ def get_movie_update(last_post_id):
 
     message = "\n".join(message_list)
     return (max_post_id, message)
+
+def get_random_movie(start_post, end_post, rand_num, base_url):
+    rets = []
+    for post_id in random.sample(range(start_post, end_post), rand_num):
+        url="{}/post/{}.html".format(base_url, post_id)
+        link, title = get_source_link(url) 
+        if link != "":
+            rets.append("{}\n{}".format(title, link))
+    return "\n".join(rets) 
 
 def good_match(s1, s2):
     set1 = set(s1)
@@ -179,7 +197,7 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
              title = item['title'].replace("<strong>", "").replace("</strong>", "")
         if good_match(moviename, title):
              movieurl = href
-             link = get_source_link(href)
+             link, title_text = get_source_link(href)
              if link.strip() == "":
                  link = href.split("url=")[1].split("&")[0]
              rets.append("{}\n{}".format(title, link))
@@ -284,7 +302,9 @@ def check_update():
        url="https://vqaf8mnvaxw.feishu.cn/sheets/Uz9tsZ7fHhV3Fgt7jWMcBl8VnNg?sheet=47b15e"
        update_infos.insert(0, "【有资源需要更新】\n{}\n".format(url))
     return "\n".join(update_infos)
-print(check_update())
+#print(check_update())
 #print(get_movie_update(1414))
+#print(get_source_link("https://moviespace01.com/post/1671.html"))
+print(get_random_movie(1000, 1500, 2,"https://affdz.com"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))

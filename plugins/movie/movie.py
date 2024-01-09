@@ -85,6 +85,18 @@ class Movie(Plugin):
             super().save_config(conf)
             e_context.action = EventAction.BREAK_PASS
 
+        if content == "资源随机推荐":
+            conf = super().load_config()
+            post_id = conf["post_id"]
+            weburl= self.conf["web_url"]
+            msg = get_random_movie(1365, post_id, 10, weburl)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"{msg}"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if content == "检查更新":
             msg = check_update()
             reply = Reply()  # 创建回复消息对象
@@ -154,7 +166,6 @@ class Movie(Plugin):
             return
 
         if content.strip().startswith("群发广告"):
-            self.set_fixed_ad_id(e_context)
             group_ads_content = self.get_ads(e_context)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
@@ -552,9 +563,12 @@ class Movie(Plugin):
         if os.path.exists(self.ads_datas_path):
             self.ads_datas = read_pickle(self.ads_datas_path)
         content = e_context['context'].content
-        content = content.replace("删除广告", "")
+        content = content.strip().replace("删除广告", "")
         try:
-            del self.ads_datas[content.strip()]
+            if content == "all":
+                self.ads_datas.clear()
+            else:
+                del self.ads_datas[content.strip()]
             write_pickle(self.ads_datas_path, self.ads_datas)
         except:
             pass
@@ -612,7 +626,7 @@ class Movie(Plugin):
             self.ads_datas = read_pickle(self.ads_datas_path)
         rets = []
         for key in self.ads_datas:
-            rets.append("{} ======= {}\n".format(key, self.ads_datas[key]))
+            rets.append("{} \n ======Begin=======\n {} \n======End======= \n".format(key, self.ads_datas[key]))
         if len(rets) == 0:
             rets.append("暂无可用广告")
         return "\n".join(rets)
@@ -697,6 +711,7 @@ class Movie(Plugin):
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
+        help_text += "输入 '资源随机推荐'， 将随机推荐资源\n"
         help_text += "输入 '检查更新'， 获检查关注的资源是不是有更新\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
         help_text += "输入 '加入资源白名单+资源名'， 将资源加入到白名单中\n"
