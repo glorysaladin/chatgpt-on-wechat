@@ -137,6 +137,9 @@ class Introduce(Plugin):
             rets.append("3. 资源均源于互联网，仅供交流学习，看完请删除.")
             if not isgroup:
                 rets.append("4. ‼️进资源群，海量资源免费： https://sourl.cn/m2ut6M ")
+            current_time = datetime.datetime.now()
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            rets.append(formatted_time)
             rets.insert(0, "-------热门资源推荐--------")
         if len(rets) > 0:
             msg: ChatMessage = context["msg"]
