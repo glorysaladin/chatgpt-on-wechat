@@ -155,7 +155,8 @@ class Introduce(Plugin):
         formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
         notice = "消息发送过于频繁 {}".format(formatted_time)
         try:
-            friend = itchat.search_friends(name='张五航')
+            reciver = self.conf["busy_msg_reciver"] 
+            friend = itchat.search_friends(name=reciver)
             itchat.send(notice, friend[0]["UserName"])
         except:
             pass

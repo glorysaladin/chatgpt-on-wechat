@@ -1,5 +1,6 @@
 {
     "interval": 10,
     "accept_friend_msg": true,
+    "busy_msg_reciver": "阿木达",
     "favorite_movie": "/home/lighthouse/project/movie_infos/favorite_movie.pkl"
 }
