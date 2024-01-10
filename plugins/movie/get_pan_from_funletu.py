@@ -26,4 +26,4 @@ def get_from_funletu(query):
             if good_match(query, title):
                 rets.append("{}\n{}".format(title, url))
     return rets
-print(get_from_funletu("三十六骑"))
+#print(get_from_funletu("三十六骑"))

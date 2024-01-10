@@ -106,6 +106,18 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
+        if content == "群发更新":
+            conf = super().load_config()
+            self.movie_version_data = read_pickle(conf['movie_version'])
+            update_msg = send_update_to_group(self.movie_version_data, conf["web_url"])
+            write_pickle(conf['movie_version'], self.movie_version_data)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"{update_msg}"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if content.strip().startswith("加入资源白名单"):
             content = content.replace("加入资源白名单","")
             self.add_movie_to_whitelist(content.strip())
@@ -331,8 +343,6 @@ class Movie(Plugin):
             movie_ads_content = self.get_rand_ads() 
 
             msg: ChatMessage = context["msg"]
-            # 写入用户信息，企业微信没有from_user_nickname，所以使用from_user_id代替
-            #uid = msg.from_user_id if not isgroup else msg.actual_user_id
             uid =  msg.from_user_id
             conf = super().load_config()
             if len(movie_ads_content) > 2 and conf["open_ads"]:
@@ -462,8 +472,7 @@ class Movie(Plugin):
             NickName = friendInfo.get("NickName", "")
             user_key = "{} 发了一个红包\n省：{}\n市：{}\n性别：{}\n签名：{}\n时间：{}".format(NickName, Province, City, Sex, Signature,  formatted_time)
 
-            friend = itchat.search_friends(name='张五航')
-            #logger.info("friend info ={}".format(friend))
+            friend = itchat.search_friends(name=self.conf['hongbao_reciver'])
             me = friend[0]["UserName"]
             itchat.send(user_key, me)
         except:
@@ -713,6 +722,7 @@ class Movie(Plugin):
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
         help_text += "输入 '资源随机推荐'， 将随机推荐资源\n"
         help_text += "输入 '检查更新'， 获检查关注的资源是不是有更新\n"
+        help_text += "输入 '群发更新'， 获更新之后的资源发送给指定的群\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
         help_text += "输入 '加入资源白名单+资源名'， 将资源加入到白名单中\n"
         help_text += "输入 '群发广告+广告ID'，群发广告信息\n"

@@ -107,4 +107,4 @@ def get_zhuiyingmao_movie(movie_name):
     if len(rets) > 0:
         rets.insert(0, "如果打不开，请复制链接到浏览器观看, 不要相信视频里的广告!!!\n")
     return rets
-print(get_zhuiyingmao_movie("旺卡"))
+#print(get_zhuiyingmao_movie("旺卡"))

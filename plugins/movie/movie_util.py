@@ -175,33 +175,44 @@ def good_match(s1, s2):
        return True 
     return False
 
-def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='json'):
-    soup = None
-    try:
-        soup = BeautifulSoup(httpDoc, 'html5lib')
-    except:
-        soup = BeautifulSoup(httpDoc, 'html.parser')
-    htmlNode = soup.html
-    bodyNode = htmlNode.body
-    listNode = bodyNode.find('div', attrs={"class":"sou-con-list"})
-    aNodes = listNode.find_all('a')
+def get_from_affdz(web_url, moviename):
     rets = []
-    source=""
-    for item in aNodes:
-        href = ""
-        title = ""
-        if item.has_key("title") and item.has_key('href'):
-             href = item['href']
-             if "post" not in href:
-                 continue
-             title = item['title'].replace("<strong>", "").replace("</strong>", "")
-        if good_match(moviename, title):
-             movieurl = href
-             link, title_text = get_source_link(href)
-             if link.strip() == "":
-                 link = href.split("url=")[1].split("&")[0]
-             rets.append("{}\n{}".format(title, link))
-             source="1"
+    try:
+        url="{}/search.php?q={}".format(web_url, moviename)
+        resp = requests.get(url, headers=headers)
+        httpDoc = resp.text
+        soup = None
+        try:
+            soup = BeautifulSoup(httpDoc, 'html5lib')
+        except:
+            soup = BeautifulSoup(httpDoc, 'html.parser')
+        htmlNode = soup.html
+        bodyNode = htmlNode.body
+        listNode = bodyNode.find('div', attrs={"class":"sou-con-list"})
+        aNodes = listNode.find_all('a')
+        source=""
+        for item in aNodes:
+            href = ""
+            title = ""
+            if item.has_attr("title") and item.has_attr('href'):
+                 href = item['href']
+                 if "post" not in href:
+                     continue
+                 title = item['title'].replace("<strong>", "").replace("</strong>", "")
+            if good_match(moviename, title):
+                 movieurl = href
+                 link, title_text = get_source_link(href)
+                 if link.strip() == "":
+                     link = href.split("url=")[1].split("&")[0]
+                 rets.append("{}\n{}".format(title, link))
+    except:
+        print(traceback.format_exc())
+    return rets
+
+def _get_search_result(web_url, moviename, is_pay_user, only_affdz, pattern='json'):
+    rets = get_from_affdz(web_url, moviename)
+    if len(rets) > 0:
+        source="1"
 
     if not only_affdz:
         #if len(rets) == 0 or is_pay_user :
@@ -242,10 +253,8 @@ def _get_search_result(httpDoc, moviename, is_pay_user, only_affdz, pattern='jso
 
     return True, rets
 
-def search_movie(web_url, movie, is_pay_user, only_affdz=False):
-    url="{}/search.php?q={}".format(web_url, movie)
-    resp = requests.get(url, headers=headers)
-    return _get_search_result(resp.text, movie, is_pay_user, only_affdz)
+def search_movie(web_url, movie, is_pay_user=False, only_affdz=False):
+    return _get_search_result(web_url, movie, is_pay_user, only_affdz)
 
 def need_update(my_count, other_count):
     if "." in my_count and "." in other_count:
@@ -262,6 +271,39 @@ def need_update(my_count, other_count):
             return False
     return False
 
+def send_update_to_group(movie_update_data, web_url):
+    curdir=os.path.dirname(os.path.abspath(__file__))
+    shell_cmd =  "sh {}/get_state_from_feishu.sh".format(curdir)
+    return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
+    update_movies = []
+    if return_cmd.returncode == 0:
+        ret_val = return_cmd.stdout
+        js = json.loads(ret_val)
+        values = js.get("data", {}).get("valueRange", {}).get("values", [])
+        for item in values:
+            if item[0] is not None:
+                movie_name = item[0].strip()
+                version = str(item[1]).strip()
+                if movie_name not in movie_update_data:
+                    movie_update_data[movie_name] = version
+                    update_movies.append(movie_name)
+                else:
+                    cur_version = version.replace("集", "")
+                    last_version = movie_update_data[movie_name].replace("集", "")
+                    if need_update(last_version, cur_version):
+                        update_movies.append(movie_name)
+                        movie_update_data[movie_name] = cur_version
+    msg_ret = []
+    for movie in update_movies:
+        ret = get_from_affdz(web_url, movie)
+        if len(ret) > 0:
+            items = ret[0].split("\n")
+            link = items[1]
+            msg = "[{}] (更新到{})\n{}".format(movie, movie_update_data[movie], link)
+            msg_ret.append(msg)
+    print("update movies={}".format(msg_ret))
+    return "\n".join(msg_ret)
+ 
 def check_update():
     update_infos=[]
     curdir=os.path.dirname(os.path.abspath(__file__))
@@ -305,6 +347,10 @@ def check_update():
 #print(check_update())
 #print(get_movie_update(1414))
 #print(get_source_link("https://moviespace01.com/post/1671.html"))
-print(get_random_movie(1000, 1500, 2,"https://affdz.com"))
+#print(get_random_movie(1000, 1500, 2,"https://affdz.com"))
+#movie_update_data={}
+#print(send_update_to_group(movie_update_data, "https://affdz.com"))
+#print(movie_update_data)
+#print(search_movie("https://affdz.com", "天官赐福第二季"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))

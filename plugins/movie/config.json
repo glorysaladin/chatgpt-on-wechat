@@ -1,12 +1,14 @@
 {
-    "post_id": 1563,
+    "post_id": 1671,
     "web_url": "https://affdz.com",
     "daily_limit": 1,
     "movie_cards": "/home/lighthouse/project/movie_infos/movie_card_datas.pkl",
     "movie_whitelist": "/home/lighthouse/project/movie_infos/moviename_whitelist.pkl",
     "ads": "/home/lighthouse/project/movie_infos/movie_ads.pkl",
     "favorite_movie": "/home/lighthouse/project/movie_infos/favorite_movie.pkl",
+    "movie_version": "/home/lighthouse/project/movie_infos/movie_update_version.pkl",
     "fixed_ads_id": "",
-    "open_ads": true,
-    "open_limit": false
+    "open_ads": false,
+    "open_limit": false,
+    "hongbao_reciver":"张五航"
 }

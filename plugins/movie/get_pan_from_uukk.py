@@ -51,4 +51,4 @@ def search(query, url):
         print(traceback.format_exc())
     return rets
 
-print(get_from_uukk("繁花", True))
+#print(get_from_uukk("繁花", True))
