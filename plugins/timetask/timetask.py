@@ -303,7 +303,8 @@ class timetask(Plugin):
             for receiver in receiver_list:
                 context.kwargs["receiver"] = receiver
                 context.kwargs["session_id"] = receiver
-                channel.send(reply, context)
+                if reply.content != "":
+                    channel.send(reply, context)
 
             #channel.send(reply, context)
             
