@@ -211,6 +211,7 @@ def get_from_affdz(web_url, moviename):
 
 def _get_search_result(web_url, moviename, is_pay_user, only_affdz, pattern='json'):
     rets = get_from_affdz(web_url, moviename)
+    source = ''
     if len(rets) > 0:
         source="1"
 
