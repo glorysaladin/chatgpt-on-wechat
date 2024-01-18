@@ -10,5 +10,6 @@
     "fixed_ads_id": "",
     "open_ads": false,
     "open_limit": false,
-    "hongbao_reciver":"阿木达"
+    "hongbao_reciver":"阿木达",
+    "open_movie_search": false
 }

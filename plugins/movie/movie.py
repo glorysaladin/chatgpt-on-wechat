@@ -258,9 +258,9 @@ class Movie(Plugin):
 
         #if ContextType.TEXT == context.type and "资源充值" in content:
         # 所有的消息都检查是否是充值
-        if ContextType.TEXT == context.type:
-            if self.recharge(e_context):
-                return
+        #if ContextType.TEXT == context.type:
+        #    if self.recharge(e_context):
+        #        return
 
         if ContextType.TEXT == context.type and "资源余额" in content:
             self.userInfo = self.get_user_info(e_context)
@@ -269,7 +269,16 @@ class Movie(Plugin):
         only_affdz = True
         if content.startswith("找") or "找" in content or self.is_whitelist_movie(content):
             only_affdz = False
-         
+
+        conf = super().load_config()
+        isgroup = context.get("isgroup", False)
+        if not conf["open_movie_search"] and not isgroup:
+            e_context["context"].type = ContextType.TEXT
+            msg: ChatMessage = e_context["context"]["msg"]
+            e_context["context"].content = f'写一句话抱歉的话告诉对方, 小助手已经没法给大家提供资源搜索了, 因为被别人多次投诉。如果你想继续找资源的话，可以加入链接里的微信群：https://sourl.cn/m2ut6M , 群满之后就不再加人了; 抱歉的话一定要带上上面的微信群链接。'
+            e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
+            return
+
         self.userInfo = self.get_user_info(e_context)
         logger.info('Cur User Info = {}, only_affdz={}'.format(self.userInfo, only_affdz))
 
@@ -278,7 +287,6 @@ class Movie(Plugin):
         for term in invalid_terms:
             moviename = moviename.replace(term , "")
 
-        conf = super().load_config()
         is_new_movie = self.is_new_search_word(self.userInfo['search_words'], moviename)
         if conf["open_limit"]:
             if is_new_movie and not self.userInfo['isgroup'] and self.userInfo["limit"] <= 0 and self.userInfo['user_nickname'] != '阿木达':
