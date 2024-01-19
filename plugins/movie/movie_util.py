@@ -285,7 +285,8 @@ def send_update_to_group(movie_update_data, web_url):
             if item[0] is not None:
                 movie_name = item[0].strip()
                 version = str(item[1]).strip()
-                if movie_name not in movie_update_data:
+                source = items[2].strip()
+                if movie_name not in movie_update_data or movie_update_data[movie_name] is None or movie_update_data[movie_name] == "None":
                     movie_update_data[movie_name] = version
                     update_movies.append(movie_name)
                 else:
@@ -293,7 +294,7 @@ def send_update_to_group(movie_update_data, web_url):
                     last_version = movie_update_data[movie_name].replace("集", "")
                     if need_update(last_version, cur_version):
                         update_movies.append(movie_name)
-                        movie_update_data[movie_name] = cur_version
+                        movie_update_data[movie_name] = version
     msg_ret = []
     for movie in update_movies:
         ret = get_from_affdz(web_url, movie)
@@ -303,7 +304,7 @@ def send_update_to_group(movie_update_data, web_url):
             msg = "[{}] (更新到{})\n{}".format(movie, movie_update_data[movie], link)
             msg_ret.append(msg)
     print("update movies={}".format(msg_ret))
-    return "\n".join(msg_ret)
+    return "\n\n".join(msg_ret)
  
 def check_update():
     update_infos=[]
@@ -317,9 +318,9 @@ def check_update():
         values = js.get("data", {}).get("valueRange", {}).get("values", [])
         for item in values:
             if item[0] is not None:
-                movie_series.append((item[0], str(item[1]).replace("集", "")))
+                movie_series.append((item[0], str(item[1]).replace("集", ""), item[2]))
     print("movie_series={}".format(movie_series))
-    for moviename, my_count in movie_series:
+    for moviename, my_count, source in movie_series:
         rets = []
         fuletu_rets = get_from_funletu(moviename)
         #print("query=", moviename, "fuletu_rets=", fuletu_rets)
@@ -337,8 +338,7 @@ def check_update():
                     matches = re.findall(pattern, cur_name)
                     for match in matches:
                         if need_update(my_count, match):
-                            #print("debug", "ret=", ret, "match=", match, "my_ount=", my_count, "*******")
-                            update_infos.append("【{}】\n当前【{}】--> 最新 【{}】 \n{}\n".format(moviename, my_count, match, ret))
+                            update_infos.append("【{}】{}\n当前【{}】--> 最新 【{}】 \n{}\n".format(moviename, source, my_count, match, ret))
             except:
                 print("error", ret)
     if len(update_infos) > 0:
