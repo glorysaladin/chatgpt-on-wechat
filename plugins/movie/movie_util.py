@@ -338,7 +338,7 @@ def check_update():
                     matches = re.findall(pattern, cur_name)
                     for match in matches:
                         if need_update(my_count, match):
-                            update_infos.append("【{}】{}\n当前【{}】--> 最新 【{}】 \n{}\n".format(moviename, source, my_count, match, ret))
+                            update_infos.append("【{}】{}\n当前 （{}）--> 最新 （{}）\n{}\n".format(moviename, source, my_count, match, ret))
             except:
                 print("error", ret)
     if len(update_infos) > 0:
