@@ -285,7 +285,7 @@ def send_update_to_group(movie_update_data, web_url):
             if item[0] is not None:
                 movie_name = item[0].strip()
                 version = str(item[1]).strip()
-                source = items[2].strip()
+                source = item[2].strip()
                 if movie_name not in movie_update_data or movie_update_data[movie_name] is None or movie_update_data[movie_name] == "None":
                     movie_update_data[movie_name] = version
                     update_movies.append(movie_name)
