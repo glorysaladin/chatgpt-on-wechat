@@ -342,7 +342,8 @@ def check_update():
             except:
                 print("error", ret)
     if len(update_infos) > 0:
-       url="https://vqaf8mnvaxw.feishu.cn/sheets/Uz9tsZ7fHhV3Fgt7jWMcBl8VnNg?sheet=47b15e"
+       #url="https://vqaf8mnvaxw.feishu.cn/sheets/Uz9tsZ7fHhV3Fgt7jWMcBl8VnNg?sheet=47b15e"
+       url="https://vqaf8mnvaxw.feishu.cn/sheets/TmvnsdGP2hZYe6tIrllcpj1unGc?sheet=f0cbff"
        update_infos.insert(0, "【有资源需要更新】\n{}\n".format(url))
     return "\n".join(update_infos)
 #print(check_update())
