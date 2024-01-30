@@ -9,6 +9,7 @@ import traceback
 import urllib
 import requests
 import random
+os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com'
 
 cur_dir=os.path.dirname(__file__)
 sys.path.append(cur_dir)
@@ -356,6 +357,6 @@ def check_update():
 #movie_update_data={}
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(movie_update_data)
-#print(search_movie("https://affdz.com", "山河令"))
+print(search_movie("https://affdz.com", "山河令"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
