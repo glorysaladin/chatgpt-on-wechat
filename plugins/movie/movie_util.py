@@ -9,6 +9,7 @@ import traceback
 import urllib
 import requests
 import random
+os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com'
 
 cur_dir=os.path.dirname(__file__)
 sys.path.append(cur_dir)
@@ -21,7 +22,8 @@ from get_movie_from_zhuiyingmao import *
 headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"}
 
 def download(url):
-    resp = requests.get(url, headers=headers)
+    proxies = {"http":None, "https":None}
+    resp = requests.get(url, headers=headers, proxies=proxies)
     return resp.text
 
 
@@ -77,7 +79,8 @@ def _extract_movie_info(httpDoc, pattern='json'):
 def get_source_link(url):
     title_text = ""
     try:
-        resp = requests.get(url, headers=headers)
+        proxies = {"http":None, "https":None}
+        resp = requests.get(url, headers=headers, proxies=proxies)
         httpDoc = resp.text
         soup = None
         try:
@@ -179,7 +182,8 @@ def get_from_affdz(web_url, moviename):
     rets = []
     try:
         url="{}/search.php?q={}".format(web_url, moviename)
-        resp = requests.get(url, headers=headers)
+        proxies = {"http":None, "https":None}
+        resp = requests.get(url, headers=headers, proxies=proxies)
         httpDoc = resp.text
         soup = None
         try:
@@ -206,7 +210,7 @@ def get_from_affdz(web_url, moviename):
                      link = href.split("url=")[1].split("&")[0]
                  rets.append("{}\n{}".format(title, link))
     except:
-        print(traceback.format_exc())
+        print("error=",traceback.format_exc())
     return rets
 
 def _get_search_result(web_url, moviename, is_pay_user, only_affdz, pattern='json'):
@@ -353,6 +357,6 @@ def check_update():
 #movie_update_data={}
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(movie_update_data)
-#print(search_movie("https://affdz.com", "天官赐福第二季"))
+print(search_movie("https://affdz.com", "山河令"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
