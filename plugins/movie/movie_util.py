@@ -281,15 +281,18 @@ def send_update_to_group(movie_update_data, web_url):
     shell_cmd =  "sh {}/get_state_from_feishu.sh".format(curdir)
     return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
     update_movies = []
+    movie_source_map = {}
     if return_cmd.returncode == 0:
         ret_val = return_cmd.stdout
         js = json.loads(ret_val)
         values = js.get("data", {}).get("valueRange", {}).get("values", [])
         for item in values:
-            if item[0] is not None:
+            if item[0] is not None and item[0] != "None" and item[0] != "null":
                 movie_name = item[0].strip()
                 version = str(item[1]).strip()
-                source = item[2].strip()
+                if item[2] is not None:
+                    source = item[2].strip() 
+                    movie_source_map[movie_name] = source
                 if movie_name not in movie_update_data or movie_update_data[movie_name] is None or movie_update_data[movie_name] == "None":
                     movie_update_data[movie_name] = version
                     update_movies.append(movie_name)
@@ -301,10 +304,15 @@ def send_update_to_group(movie_update_data, web_url):
                         movie_update_data[movie_name] = version
     msg_ret = []
     for movie in update_movies:
-        ret = get_from_affdz(web_url, movie)
-        if len(ret) > 0:
-            items = ret[0].split("\n")
-            link = items[1]
+        link = ""
+        if movie in movie_source_map and "http" in movie_source_map[movie]:
+            link = movie_source_map[movie] 
+        else:
+            ret = get_from_affdz(web_url, movie)
+            if len(ret) > 0:
+                items = ret[0].split("\n")
+                link = items[1]
+        if len(link) > 0:
             msg = "[{}] (更新到{})\n{}".format(movie, movie_update_data[movie], link)
             msg_ret.append(msg)
     print("update movies={}".format(msg_ret))
@@ -354,8 +362,8 @@ def check_update():
 #print(get_movie_update(1414))
 #print(get_source_link("https://moviespace01.com/post/1671.html"))
 #print(get_random_movie(1000, 1500, 2,"https://affdz.com"))
-#movie_update_data={}
-#print(send_update_to_group(movie_update_data, "https://affdz.com"))
+movie_update_data={}
+print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(movie_update_data)
 print(search_movie("https://affdz.com", "山河令"))
 #if __name__ == "__main__":
