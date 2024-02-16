@@ -31,3 +31,4 @@ plugins/banwords/lib/__pycache__
 !plugins/keyword
 !plugins/linkai
 plugins/introduce/config.json
+client_config.json

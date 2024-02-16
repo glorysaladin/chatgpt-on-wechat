@@ -282,7 +282,7 @@ class Movie(Plugin):
         self.userInfo = self.get_user_info(e_context)
         logger.info('Cur User Info = {}, only_affdz={}'.format(self.userInfo, only_affdz))
 
-        moviename=content.strip().replace("找","")
+        moviename=content.strip().replace("找", "", 1)
         invalid_terms=["资源", "电影", "电视剧", "韩剧", "动漫", "完整版", "未删减版", "未删减", "无删减", "，","," "+", "资源" "\"", "”", "“", "《", "》", "谢谢", "\'" , "【","】", "[", "]", "➕"]
         for term in invalid_terms:
             moviename = moviename.replace(term , "")

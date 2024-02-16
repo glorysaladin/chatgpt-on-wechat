@@ -80,7 +80,7 @@ def get_source_link(url):
     title_text = ""
     try:
         proxies = {"http":None, "https":None}
-        resp = requests.get(url, headers=headers, proxies=proxies)
+        resp = requests.get(url, headers=headers, proxies=proxies, timeout=3)
         httpDoc = resp.text
         soup = None
         try:
@@ -362,8 +362,8 @@ def check_update():
 #print(get_movie_update(1414))
 #print(get_source_link("https://moviespace01.com/post/1671.html"))
 #print(get_random_movie(1000, 1500, 2,"https://affdz.com"))
-movie_update_data={}
-print(send_update_to_group(movie_update_data, "https://affdz.com"))
+#movie_update_data={}
+#print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(movie_update_data)
 print(search_movie("https://affdz.com", "山河令"))
 #if __name__ == "__main__":
