@@ -310,8 +310,10 @@ class Movie(Plugin):
         # 大家都在找
         favorite_movies = self.get_favorite_movie(moviename)
         if len(favorite_movies) > 0:
-            movie_results .append("\n----------大家都在找----------")
+            movie_results.append("\n----------大家都在找----------")
             movie_results.extend(favorite_movies)
+        movie_results.append("\n----------🔥热播影视----------")
+        movie_results.append("https://vqaf8mnvaxw.feishu.cn/docx/KucadaKKoo2QT3xFHXtcFkabngb\n")
         
         if only_affdz and not ret:
             return
