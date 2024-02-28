@@ -81,8 +81,8 @@ class Introduce(Plugin):
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
             logger.info(f"start to welcome {msg.from_user_nickname}.")
-            #e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以 找资源名 格式找资源, 并用 找还珠格格 举例。建议他收藏我方便以后查找资源。最后发一句日常的祝福语。'
-            e_context["context"].content = f'写一句话抱歉的话告诉对方, 小助手已经没法给大家提供资源搜索了, 因为被别人多次投诉。如果你想继续找资源的话，可以加入链接里的微信群：https://sourl.cn/m2ut6M , 群满之后就不再加人了; 抱歉的话一定要带上上面的微信群链接。'
+            e_context["context"].content = f'以你好作为欢迎语开头， 提示一定要以 找资源名 格式找资源, 并用 找还珠格格 举例。建议他收藏我方便以后查找资源。最后发一句日常的祝福语。'
+            #e_context["context"].content = f'写一句话抱歉的话告诉对方, 小助手已经没法给大家提供资源搜索了, 因为被别人多次投诉。如果你想继续找资源的话，可以加入链接里的微信群：https://sourl.cn/m2ut6M , 群满之后就不再加人了; 抱歉的话一定要带上上面的微信群链接。'
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
            
