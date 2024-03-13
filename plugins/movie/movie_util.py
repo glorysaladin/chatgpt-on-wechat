@@ -329,6 +329,8 @@ def check_update():
         js = json.loads(ret_val)
         values = js.get("data", {}).get("valueRange", {}).get("values", [])
         for item in values:
+            if item[3] is not None:
+                continue
             if item[0] is not None:
                 movie_series.append((item[0], str(item[1]).replace("集", ""), item[2]))
     print("movie_series={}".format(movie_series))
@@ -365,6 +367,6 @@ def check_update():
 #movie_update_data={}
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(movie_update_data)
-print(search_movie("https://affdz.com", "山河令"))
+#print(search_movie("https://affdz.com", "山河令"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
