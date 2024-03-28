@@ -10,11 +10,10 @@ def good_match(s1, s2):
        return True 
     return False
 
-COOKIE="Hm_lvt_cce07f87930c14786d9eced9c08d0e89=1700320320,1700750079,1701444675; Hm_lpvt_cce07f87930c14786d9eced9c08d0e89=1701964941"
-#URLS=["http://uukk6.cn/v/api/getJuzi", "http://uukk6.cn/v/api/getDyfx", "http://uukk6.cn/v/api/getTTZJB"]
-#URLS=["http://uukk6.cn/v/api/getJuzi", "http://uukk6.cn/v/api/getTTZJB"]
-#URLS=["http://22006.cn/v/api/getJuzi", "http://22006.cn/v/api/getpwdcfg", "http://22006.cn/v/api/getDyfx", "http://22006.cn/v/api/getTTZJB"]
-URLS=["http://22006.cn/v/api/getJuzi", "http://22006.cn/v/api/getDyfx", "http://22006.cn/v/api/getTTZJB"]
+#COOKIE="Hm_lvt_cce07f87930c14786d9eced9c08d0e89=1700320320,1700750079,1701444675; Hm_lpvt_cce07f87930c14786d9eced9c08d0e89=1701964941"
+COOKIE="Hm_lvt_0f5b4479829961ae8a3cb0e80ec93808=1711593533; Hm_lpvt_0f5b4479829961ae8a3cb0e80ec93808=1711593543"
+#URLS=["http://22006.cn/v/api/getJuzi", "http://22006.cn/v/api/getDyfx", "http://22006.cn/v/api/getTTZJB"]
+URLS=["http://cc.yatspa.com/v/api/getJuzi", "http://cc.yatspa.com/v/api/getTTZJB", "http://cc.yatspa.com/v/api/getDyfx"]
 
 def get_from_uukk(query, is_pay_user):
     rets = []
@@ -29,7 +28,6 @@ def search(query, url):
     try:
         curdir = os.path.dirname(os.path.abspath(__file__))
         shell_cmd =  "sh {}/curl_uukk.sh {} {} \"{}\"".format(curdir, query, url, COOKIE)
-        #print(shell_cmd)
         return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
         if return_cmd.returncode == 0:
             ret_val = return_cmd.stdout
@@ -47,8 +45,9 @@ def search(query, url):
                     tmp="{}\n{}".format(question, answer)
                     tmp = tmp.replace("\n\n", "\n")
                     rets.append(tmp)
+        #print("*********{}\n{}\n\n".format(url , rets))
     except:
         print(traceback.format_exc())
     return rets
 
-#print(get_from_uukk("繁花", True))
+#print(get_from_uukk("天龙八部", True))

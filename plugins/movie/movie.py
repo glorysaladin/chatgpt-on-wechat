@@ -89,7 +89,7 @@ class Movie(Plugin):
             conf = super().load_config()
             post_id = conf["post_id"]
             weburl= self.conf["web_url"]
-            msg = get_random_movie(1365, post_id, 10, weburl)
+            msg = get_random_movie(1365, post_id, 10, weburl, False)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"
@@ -109,7 +109,7 @@ class Movie(Plugin):
         if content == "群发更新":
             conf = super().load_config()
             self.movie_version_data = read_pickle(conf['movie_version'])
-            update_msg = send_update_to_group(self.movie_version_data, conf["web_url"])
+            update_msg = send_update_to_group(self.movie_version_data, conf["web_url"], conf["show_movie_link"])
             write_pickle(conf['movie_version'], self.movie_version_data)
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
@@ -266,16 +266,17 @@ class Movie(Plugin):
             self.userInfo = self.get_user_info(e_context)
             return self.check_limit(e_context)
                 
+        conf = super().load_config()
         only_affdz = True
-        if content.startswith("找") or "找" in content or self.is_whitelist_movie(content):
+        if (content.startswith("找") or "找" in content or self.is_whitelist_movie(content)) and not conf["only_affdz"]:
             only_affdz = False
 
-        conf = super().load_config()
         isgroup = context.get("isgroup", False)
         if not conf["open_movie_search"] and not isgroup:
             e_context["context"].type = ContextType.TEXT
             msg: ChatMessage = e_context["context"]["msg"]
-            e_context["context"].content = f'写一句话抱歉的话告诉对方, 小助手已经没法给大家提供资源搜索了, 因为被别人多次投诉。如果你想继续找资源的话，可以加入链接里的微信群：https://sourl.cn/m2ut6M , 群满之后就不再加人了; 抱歉的话一定要带上上面的微信群链接。'
+            #e_context["context"].content = f'小助手已经没法给大家提供资源搜索了, 因为被别人多次投诉。如果你想继续找资源的话，可以加入链接里的微信群：https://sourl.cn/m2ut6M , 群满之后就不再加人了; 抱歉的话一定要带上上面的微信群链接。'
+            e_context["context"].content = f'抱歉小助手已经没法给大家提供资源搜索了'
             e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
             return
 
@@ -298,22 +299,19 @@ class Movie(Plugin):
                 reply.content = "非常感谢您的支持，请您发个 1元以上的红包作为鼓励, 就可以继续资源搜索功能，同时可以享受夸克、百度、迅雷等多个网盘的资源搜索服务."
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
-                #e_context["context"].type = ContextType.TEXT
-                #msg: ChatMessage = e_context["context"]["msg"]
-                #e_context["context"].content = f"请让对方给你发送一个红包作为鼓励，发送之后可以继续使用资源搜索服务。"
-                #e_context.action = EventAction.BREAK  # 事件结束，进入默认处理逻辑
                 return
     
         weburl= self.conf["web_url"]
-        ret, movie_results = search_movie(weburl, moviename, self.userInfo['ispayuser'], only_affdz)
+        show_link = self.conf["show_movie_link"]
+        ret, movie_results = search_movie(weburl, moviename, show_link, self.userInfo['ispayuser'], only_affdz)
 
         # 大家都在找
         favorite_movies = self.get_favorite_movie(moviename)
         if len(favorite_movies) > 0:
             movie_results.append("\n----------大家都在找----------")
             movie_results.extend(favorite_movies)
-        movie_results.append("\n----------🔥热播影视----------")
-        movie_results.append("https://vqaf8mnvaxw.feishu.cn/docx/KucadaKKoo2QT3xFHXtcFkabngb\n")
+        #movie_results.append("\n----------🔥热播影视----------")
+        #movie_results.append("https://vqaf8mnvaxw.feishu.cn/docx/KucadaKKoo2QT3xFHXtcFkabngb\n")
         
         if only_affdz and not ret:
             return
@@ -328,16 +326,18 @@ class Movie(Plugin):
                     self.user_datas[self.userInfo['user_key']]["limit"] -= 1
                     self.user_datas[self.userInfo['user_key']]["search_words"].append(moviename)
                     write_pickle(self.user_datas_path, self.user_datas)
+                if not show_link:
+                    reply.content += "\n"
+                    reply.content += "资源链接可以从交流群公告的网站获取"
 
                 reply.content += "\n\n"
                 reply.content += "--------------------------------\n"
                 #if self.user_datas[self.userInfo['user_key']]['is_pay_user']:
                 #    reply.content += "您剩余 {} 次资源搜索\n".format(self.user_datas[self.userInfo['user_key']]["limit"])
                 reply.content += "提示：\n1. 夸克会显示试看2分钟，转存到自己的夸克网盘就能看完整的视频.\n"
-                reply.content += "2. 不能保证都可以观看，自己试.\n"
-                reply.content += "3. 资源均源于互联网，仅供交流学习，看完请删除.\n"
-                if not isgroup:
-                    reply.content += "4. ‼️进资源群，海量资源免费： https://sourl.cn/m2ut6M \n"
+                reply.content += "2. 资源均源于互联网，仅供交流学习，看完请删除.\n"
+                #if not isgroup:
+                #    reply.content += "4. ‼️进资源群，海量资源免费： https://sourl.cn/m2ut6M \n"
                 #reply.content += "4. ❤️夸克网盘及各大app会员，激活VIP看这里 https://sourl.cn/vAxErZ \n"
                 #reply.content += "4. ❤️ 各种正经和不正经的小说,看这里 https://sourl.cn/Bkt6yg \n"
                 #reply.content += "🥳 方便好用，分享给朋友 [庆祝]\n"

@@ -161,13 +161,18 @@ def get_movie_update(last_post_id):
     message = "\n".join(message_list)
     return (max_post_id, message)
 
-def get_random_movie(start_post, end_post, rand_num, base_url):
+def get_random_movie(start_post, end_post, rand_num, base_url, show_link=False):
     rets = []
     for post_id in random.sample(range(start_post, end_post), rand_num):
         url="{}/post/{}.html".format(base_url, post_id)
         link, title = get_source_link(url) 
         if link != "":
-            rets.append("{}\n{}".format(title, link))
+            if not show_link:
+                link = ""
+            rets.append("{}\n{}".format(title, link)) 
+    if not show_link and len(rets) > 0:
+        rets.append("👉资源可以从群公告的网站获取")
+    
     return "\n".join(rets) 
 
 def good_match(s1, s2):
@@ -178,7 +183,7 @@ def good_match(s1, s2):
        return True 
     return False
 
-def get_from_affdz(web_url, moviename):
+def get_from_affdz(web_url, moviename, show_link=False):
     rets = []
     try:
         url="{}/search.php?q={}".format(web_url, moviename)
@@ -208,29 +213,20 @@ def get_from_affdz(web_url, moviename):
                  link, title_text = get_source_link(href)
                  if link.strip() == "":
                      link = href.split("url=")[1].split("&")[0]
+                 if not show_link:
+                     link = " "
                  rets.append("{}\n{}".format(title, link))
     except:
         print("error=",traceback.format_exc())
     return rets
 
-def _get_search_result(web_url, moviename, is_pay_user, only_affdz, pattern='json'):
-    rets = get_from_affdz(web_url, moviename)
+def _get_search_result(web_url, moviename, show_link, is_pay_user, only_affdz, pattern='json'):
+    rets = get_from_affdz(web_url, moviename, show_link)
     source = ''
     if len(rets) > 0:
         source="1"
 
     if not only_affdz:
-        #if len(rets) == 0 or is_pay_user :
-        #    rets.extend(get_zhuiyingmao_movie(moviename))
-        #    if len(rets) > 0:
-        #        source += "a"
-
-        #if len(rets) == 0 or is_pay_user :
-            #rets.extend(get_tbs_movie(moviename))
-            #rets.extend(get_soupian_movie(moviename))
-            #if len(rets) > 0:
-            #    source += "b"
-
         if len(rets) == 0 or is_pay_user :
             rets.extend(get_from_funletu(moviename))
             if len(rets) > 0:
@@ -240,11 +236,6 @@ def _get_search_result(web_url, moviename, is_pay_user, only_affdz, pattern='jso
             rets.extend(get_from_uukk(moviename, is_pay_user))
             if len(rets) > 0:
                 source += "3"
-
-        #if len(rets) == 0 or is_pay_user:
-        #    rets.extend(get_from_qianfan(moviename))
-        #    if len(rets) > 0:
-        #        source += "4"
 
     if len(rets) == 0:
         return False, ["未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."]
@@ -258,8 +249,8 @@ def _get_search_result(web_url, moviename, is_pay_user, only_affdz, pattern='jso
 
     return True, rets
 
-def search_movie(web_url, movie, is_pay_user=False, only_affdz=False):
-    return _get_search_result(web_url, movie, is_pay_user, only_affdz)
+def search_movie(web_url, movie, show_link=False, is_pay_user=False, only_affdz=False):
+    return _get_search_result(web_url, movie, show_link, is_pay_user, only_affdz)
 
 def need_update(my_count, other_count):
     if "." in my_count and "." in other_count:
@@ -276,7 +267,7 @@ def need_update(my_count, other_count):
             return False
     return False
 
-def send_update_to_group(movie_update_data, web_url):
+def send_update_to_group(movie_update_data, web_url, show_link):
     curdir=os.path.dirname(os.path.abspath(__file__))
     shell_cmd =  "sh {}/get_state_from_feishu.sh".format(curdir)
     return_cmd = subprocess.run(shell_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8',shell=True)
@@ -308,14 +299,18 @@ def send_update_to_group(movie_update_data, web_url):
         if movie in movie_source_map and "http" in movie_source_map[movie]:
             link = movie_source_map[movie] 
         else:
-            ret = get_from_affdz(web_url, movie)
+            ret = get_from_affdz(web_url, movie, True)
             if len(ret) > 0:
                 items = ret[0].split("\n")
                 link = items[1]
         if len(link) > 0:
+            if not show_link:
+                link = ""
             msg = "[{}] (更新到{})\n{}".format(movie, movie_update_data[movie], link)
             msg_ret.append(msg)
     print("update movies={}".format(msg_ret))
+    if not show_link and len(msg_ret) > 0:
+        msg_ret.append("资源链接可以从群公告的网站里找一下")
     return "\n\n".join(msg_ret)
  
 def check_update():
@@ -342,6 +337,7 @@ def check_update():
         uukk_rets = get_from_uukk(moviename, True)
         rets.extend(uukk_rets)
         for ret in rets:
+            #print(ret)
             try:
                 if "quark" not in ret:
                     continue
