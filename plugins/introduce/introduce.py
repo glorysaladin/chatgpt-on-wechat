@@ -74,6 +74,14 @@ class Introduce(Plugin):
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS 
 
+        if content.strip().startswith("添加小红书cookie"):
+            self.add_xhs_cookie(e_context)
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = "已添加" 
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+
         if  content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
             if self.conf["open_movie_search"]:
                 self.send_favorite_movie(e_context)
@@ -175,9 +183,18 @@ class Introduce(Plugin):
             lines.append(line.strip())
         return "\n".join(lines)
 
+    def add_xhs_cookie(self, e_context):
+        content = e_context['context'].content
+        cookie = content.replace("添加小红书cookie", "").strip()
+        conf = super().load_config()
+        cookie_path=conf["xhs_cookie_file"]
+        with open(cookie_path, 'a') as f:
+            f.write(cookie+"\n")
+
     def get_help_text(self, **kwargs):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '功能介绍'， 将获得机器人的功能介绍.\n"
+        help_text += "输入 '添加小红书cookie+cookiestr'， 添加小红书cookie.\n"
         help_text += "输入 '开启新朋友消息'， 接受新朋友时将发送欢迎消息.\n"
         help_text += "输入 '关闭新朋友消息'， 接受新朋友时将不发送欢迎消息.\n"
         return help_text
