@@ -103,6 +103,19 @@ def get_source_link(url):
     except:
         print(traceback.format_exc())
     return "", title_text
+def get_latest_postid(last_post_id, web_url):
+    rets = {}
+    html_page=download(web_url)
+    ret_page=_extract_movie_info(html_page)
+    rets.update(ret_page)
+
+    max_post_id = -1
+    for key in rets:
+        href = rets[key]
+        cur_id = int(href.split("/")[-1].split(".")[0])
+        if cur_id > max_post_id:
+            max_post_id = cur_id
+    return max_post_id
 
 def get_movie_update(last_post_id):
     rets = {}
@@ -171,7 +184,8 @@ def get_random_movie(start_post, end_post, rand_num, base_url, show_link=False):
                 link = ""
             rets.append("{}\n{}".format(title, link)) 
     if not show_link and len(rets) > 0:
-        rets.append("👉资源可以从群公告的网站获取")
+        rets.append("👉资源可以从群公告取")
+        #rets.append("https://6url.cn/tEQs9z")
     
     return "\n".join(rets) 
 
@@ -310,7 +324,8 @@ def send_update_to_group(movie_update_data, web_url, show_link):
             msg_ret.append(msg)
     print("update movies={}".format(msg_ret))
     if not show_link and len(msg_ret) > 0:
-        msg_ret.append("资源链接可以从群公告的网站里找一下")
+        msg_ret.append("资源链接可以从群公告获取")
+        #msg_ret.append("https://6url.cn/tEQs9z")
     return "\n\n".join(msg_ret)
  
 def check_update():
@@ -362,6 +377,7 @@ def check_update():
 #print(get_random_movie(1000, 1500, 2,"https://affdz.com"))
 #movie_update_data={}
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
+print(get_latest_postid(1500, "https://affdz.com"))
 #print(movie_update_data)
 #print(search_movie("https://affdz.com", "山河令"))
 #if __name__ == "__main__":

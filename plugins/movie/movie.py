@@ -84,6 +84,17 @@ class Movie(Plugin):
             conf["post_id"] = last_post_id
             super().save_config(conf)
             e_context.action = EventAction.BREAK_PASS
+        if content == "更新最大资源":
+            conf = super().load_config()
+            post_id = conf["post_id"]
+            print("movie: post_id = {}".format(post_id))
+            last_post_id  = get_latest_postid(post_id, conf["web_url"])
+
+            conf["post_id"] = last_post_id
+            super().save_config(conf)
+
+            e_context.action = EventAction.BREAK_PASS
+
 
         if content == "资源随机推荐":
             conf = super().load_config()
@@ -328,7 +339,8 @@ class Movie(Plugin):
                     write_pickle(self.user_datas_path, self.user_datas)
                 if not show_link:
                     reply.content += "\n"
-                    reply.content += "资源链接可以从交流群公告的网站获取"
+                    reply.content += "资源链接可以从群公告获取"
+                    #reply.content += "https://6url.cn/tEQs9z"
 
                 reply.content += "\n\n"
                 reply.content += "--------------------------------\n"
@@ -731,6 +743,7 @@ class Movie(Plugin):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
         help_text += "输入 '资源随机推荐'， 将随机推荐资源\n"
+        help_text += "输入 '更新最大资源'， 获取网站最大的资源ID\n"
         help_text += "输入 '检查更新'， 获检查关注的资源是不是有更新\n"
         help_text += "输入 '群发更新'， 获更新之后的资源发送给指定的群\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
