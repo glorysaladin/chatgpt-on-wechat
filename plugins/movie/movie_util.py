@@ -9,7 +9,7 @@ import traceback
 import urllib
 import requests
 import random
-os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com'
+os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com,moviespace02.com'
 
 cur_dir=os.path.dirname(__file__)
 sys.path.append(cur_dir)
@@ -103,6 +103,20 @@ def get_source_link(url):
     except:
         print(traceback.format_exc())
     return "", title_text
+
+def get_latest_postid(last_post_id, web_url):
+    rets = {}
+    html_page=download(web_url)
+    ret_page=_extract_movie_info(html_page)
+    rets.update(ret_page)
+
+    max_post_id = -1
+    for key in rets:
+        href = rets[key]
+        cur_id = int(href.split("/")[-1].split(".")[0])
+        if cur_id > max_post_id:
+            max_post_id = cur_id
+    return max_post_id
 
 def get_movie_update(last_post_id):
     rets = {}
@@ -220,11 +234,14 @@ def get_from_affdz(web_url, moviename, show_link=False):
         print("error=",traceback.format_exc())
     return rets
 
-def _get_search_result(web_url, moviename, show_link, is_pay_user, only_affdz, pattern='json'):
-    rets = get_from_affdz(web_url, moviename, show_link)
+def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_affdz, pattern='json'):
     source = ''
-    if len(rets) > 0:
-        source="1"
+    rets = []
+    for idx, web_url in enumerate(web_url_list):
+        rets.extend(get_from_affdz(web_url, moviename, show_link))
+        if len(rets) > 0:
+            source = source + str(idx)
+            break
 
     if not only_affdz:
         if len(rets) == 0 or is_pay_user :
@@ -249,22 +266,27 @@ def _get_search_result(web_url, moviename, show_link, is_pay_user, only_affdz, p
 
     return True, rets
 
-def search_movie(web_url, movie, show_link=False, is_pay_user=False, only_affdz=False):
-    return _get_search_result(web_url, movie, show_link, is_pay_user, only_affdz)
+def search_movie(web_url_list, movie, show_link=False, is_pay_user=False, only_affdz=False):
+    return _get_search_result(web_url_list, movie, show_link, is_pay_user, only_affdz)
 
 def need_update(my_count, other_count):
-    if "." in my_count and "." in other_count:
-        # 将日期字符串转换为datetime对象
-        date1_obj = datetime.strptime(str(my_count), "%m.%d")
-        date2_obj = datetime.strptime(str(other_count), "%m.%d")
-        if date1_obj < date2_obj:
-            return True
-        return False
-    else:
-        if "." not in my_count and "." not in other_count:
-            if int(my_count) < int(other_count):
+    try:
+        if "." in my_count and "." in other_count:
+            # 将日期字符串转换为datetime对象
+            date1_obj = datetime.strptime(str(my_count), "%m.%d")
+            date2_obj = datetime.strptime(str(other_count), "%m.%d")
+            if date1_obj < date2_obj:
                 return True
             return False
+        else:
+            if "." not in my_count and "." not in other_count:
+                if int(other_count) > 2000:
+                    return False
+                if int(my_count) < int(other_count):
+                    return True
+                return False
+    except:
+        pass
     return False
 
 def send_update_to_group(movie_update_data, web_url, show_link):
@@ -351,18 +373,18 @@ def check_update():
                             update_infos.append("【{}】{}\n当前 （{}）--> 最新 （{}）\n{}\n".format(moviename, source, my_count, match, ret))
             except:
                 print("error", ret)
-    if len(update_infos) > 0:
-       #url="https://vqaf8mnvaxw.feishu.cn/sheets/Uz9tsZ7fHhV3Fgt7jWMcBl8VnNg?sheet=47b15e"
-       url="https://vqaf8mnvaxw.feishu.cn/sheets/TmvnsdGP2hZYe6tIrllcpj1unGc?sheet=f0cbff"
-       update_infos.insert(0, "【有资源需要更新】\n{}\n".format(url))
     return "\n".join(update_infos)
+
 #print(check_update())
 #print(get_movie_update(1414))
 #print(get_source_link("https://moviespace01.com/post/1671.html"))
 #print(get_random_movie(1000, 1500, 2,"https://affdz.com"))
+
+#movie_version="/home/lighthouse/project/chatgpt-on-wechat2/plugins/movie/movie_update_version.pkl"
 #movie_update_data={}
-#print(send_update_to_group(movie_update_data, "https://affdz.com"))
+#print(send_update_to_group(movie_update_data, "https://moviespace02.com", True))
 #print(movie_update_data)
-#print(search_movie("https://affdz.com", "山河令"))
+#print(search_movie(["https://moviespace02.com"], "大侦探", True, False, True))
+#print(get_latest_postid(1, "https://moviespace02.com"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))

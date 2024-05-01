@@ -85,11 +85,23 @@ class Movie(Plugin):
             super().save_config(conf)
             e_context.action = EventAction.BREAK_PASS
 
+        if content == "更新最大资源":
+            conf = super().load_config()
+            post_id = conf["post_id"]
+            print("movie: post_id = {}".format(post_id))
+            last_post_id  = get_latest_postid(post_id, conf["web_url"])
+
+            conf["post_id"] = last_post_id
+            super().save_config(conf)
+
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if content == "资源随机推荐":
             conf = super().load_config()
             post_id = conf["post_id"]
             weburl= self.conf["web_url"]
-            msg = get_random_movie(1365, post_id, 10, weburl, False)
+            msg = get_random_movie(1, post_id, 10, weburl, conf["show_movie_link"])
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"
@@ -99,6 +111,9 @@ class Movie(Plugin):
 
         if content == "检查更新":
             msg = check_update()
+            if len(msg) > 5:
+                feishu_link = self.conf["feishu_link"]
+                msg = "【有资源需要更新】\n {}\n\n".format(feishu_link) + msg
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"
@@ -109,8 +124,11 @@ class Movie(Plugin):
         if content == "群发更新":
             conf = super().load_config()
             self.movie_version_data = read_pickle(conf['movie_version'])
+            logger.debug("Start update movie.")
+            logger.debug("movie_version_data={}".format(self.movie_version_data))
             update_msg = send_update_to_group(self.movie_version_data, conf["web_url"], conf["show_movie_link"])
             write_pickle(conf['movie_version'], self.movie_version_data)
+            logger.debug("finish update movie.")
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{update_msg}"
@@ -314,6 +332,7 @@ class Movie(Plugin):
         #movie_results.append("https://vqaf8mnvaxw.feishu.cn/docx/KucadaKKoo2QT3xFHXtcFkabngb\n")
         
         if only_affdz and not ret:
+            logger.info("failed to get {}, ret={}".format(moviename, ret))
             return
         else:
             reply = Reply()  # 创建回复消息对象
@@ -731,6 +750,7 @@ class Movie(Plugin):
         help_text = "发送关键词执行对应操作\n"
         help_text += "输入 '电影更新'， 将获取今日更新的电影\n"
         help_text += "输入 '资源随机推荐'， 将随机推荐资源\n"
+        help_text += "输入 '更新最大资源'， 获取网站最大的资源ID\n"
         help_text += "输入 '检查更新'， 获检查关注的资源是不是有更新\n"
         help_text += "输入 '群发更新'， 获更新之后的资源发送给指定的群\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
