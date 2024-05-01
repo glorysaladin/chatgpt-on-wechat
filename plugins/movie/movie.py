@@ -89,7 +89,7 @@ class Movie(Plugin):
             conf = super().load_config()
             post_id = conf["post_id"]
             print("movie: post_id = {}".format(post_id))
-            last_post_id  = get_latest_postid(post_id, conf["web_url"])
+            last_post_id  = get_latest_postid(post_id, conf["web_url"][0])
 
             conf["post_id"] = last_post_id
             super().save_config(conf)
@@ -101,7 +101,7 @@ class Movie(Plugin):
             conf = super().load_config()
             post_id = conf["post_id"]
             weburl= self.conf["web_url"]
-            msg = get_random_movie(1, post_id, 10, weburl, conf["show_movie_link"])
+            msg = get_random_movie(1, post_id, 10, weburl[0], conf["show_movie_link"])
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{msg}"
@@ -321,6 +321,7 @@ class Movie(Plugin):
     
         weburl= self.conf["web_url"]
         show_link = self.conf["show_movie_link"]
+        logger.debug("weburl={}".format(weburl))
         ret, movie_results = search_movie(weburl, moviename, show_link, self.userInfo['ispayuser'], only_affdz)
 
         # 大家都在找

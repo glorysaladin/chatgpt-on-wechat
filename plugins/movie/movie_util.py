@@ -244,12 +244,12 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
             break
 
     if not only_affdz:
-        if len(rets) == 0 or is_pay_user :
+        if len(rets) == 0:
             rets.extend(get_from_funletu(moviename))
             if len(rets) > 0:
                 source += "2"
 
-        if len(rets) == 0 or is_pay_user:
+        if len(rets) == 0:
             rets.extend(get_from_uukk(moviename, is_pay_user))
             if len(rets) > 0:
                 source += "3"
@@ -384,7 +384,7 @@ def check_update():
 #movie_update_data={}
 #print(send_update_to_group(movie_update_data, "https://moviespace02.com", True))
 #print(movie_update_data)
-#print(search_movie(["https://moviespace02.com"], "大侦探", True, False, True))
+print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "如懿传", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
