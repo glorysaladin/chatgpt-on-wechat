@@ -84,6 +84,17 @@ class Movie(Plugin):
             conf["post_id"] = last_post_id
             super().save_config(conf)
             e_context.action = EventAction.BREAK_PASS
+        if content == "更新最大资源":
+            conf = super().load_config()
+            post_id = conf["post_id"]
+            print("movie: post_id = {}".format(post_id))
+            last_post_id  = get_latest_postid(post_id, conf["web_url"])
+
+            conf["post_id"] = last_post_id
+            super().save_config(conf)
+
+            e_context.action = EventAction.BREAK_PASS
+
 
         if content == "更新最大资源":
             conf = super().load_config()
@@ -348,7 +359,8 @@ class Movie(Plugin):
                     write_pickle(self.user_datas_path, self.user_datas)
                 if not show_link:
                     reply.content += "\n"
-                    reply.content += "资源链接可以从交流群公告的网站获取"
+                    reply.content += "资源链接可以从群公告获取"
+                    #reply.content += "https://6url.cn/tEQs9z"
 
                 reply.content += "\n\n"
                 reply.content += "--------------------------------\n"
@@ -708,7 +720,6 @@ class Movie(Plugin):
             rets.append("暂无推荐资源")
         return "\n".join(rets)
 
-
     def add_favorite_movie(self, e_context: EventContext):
         favorite_movie_datas = {}
         if os.path.exists(self.favorite_movie_path):
@@ -718,7 +729,8 @@ class Movie(Plugin):
         movie_name = content.replace("添加推荐资源", "")
 
         weburl= self.conf["web_url"]
-        ret, movie_results = search_movie(weburl, movie_name, False, True)
+        show_link = self.conf["show_movie_link"]
+        ret, movie_results = search_movie(weburl, movie_name, show_link, False, True)
         if ret:
             favorite_movie_datas[movie_name] = "\n".join(movie_results[1:])
             write_pickle(self.favorite_movie_path, favorite_movie_datas)
