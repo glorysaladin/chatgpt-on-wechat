@@ -753,10 +753,15 @@ class Movie(Plugin):
         favorite_movie_datas = {}
         if os.path.exists(self.favorite_movie_path):
             favorite_movie_datas = read_pickle(self.favorite_movie_path)
+        show_link = self.conf["show_movie_link"]
         rets = []
         for key in favorite_movie_datas:
             if key != moviename:
-                rets.append("{}".format(favorite_movie_datas[key]))
+                value = favorite_movie_datas[key]
+                if not show_link:
+                    items = value.split("\n")
+                    value = items[0]
+                rets.append("{}".format(value))
         return rets 
 
     def get_help_text(self, **kwargs):
