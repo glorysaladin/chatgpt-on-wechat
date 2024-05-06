@@ -137,7 +137,7 @@ class Movie(Plugin):
             self.movie_version_data = read_pickle(conf['movie_version'])
             logger.debug("Start update movie.")
             logger.debug("movie_version_data={}".format(self.movie_version_data))
-            update_msg = send_update_to_group(self.movie_version_data, conf["web_url"], conf["show_movie_link"])
+            update_msg = send_update_to_group(self.movie_version_data, conf["web_url"][0], conf["show_movie_link"])
             write_pickle(conf['movie_version'], self.movie_version_data)
             logger.debug("finish update movie.")
             reply = Reply()  # 创建回复消息对象
