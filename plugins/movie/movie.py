@@ -115,7 +115,7 @@ class Movie(Plugin):
             msg = get_random_movie(1, post_id, 10, weburl[0], conf["show_movie_link"])
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-            reply.content = f"{msg}"
+            reply.content = f"{msg} \n\n ❤️以 '@我 找莲花楼' 的方式搜索任意资源链接"
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS
             return
