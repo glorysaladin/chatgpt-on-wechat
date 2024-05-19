@@ -88,18 +88,6 @@ class Movie(Plugin):
             conf = super().load_config()
             post_id = conf["post_id"]
             print("movie: post_id = {}".format(post_id))
-            last_post_id  = get_latest_postid(post_id, conf["web_url"])
-
-            conf["post_id"] = last_post_id
-            super().save_config(conf)
-
-            e_context.action = EventAction.BREAK_PASS
-
-
-        if content == "更新最大资源":
-            conf = super().load_config()
-            post_id = conf["post_id"]
-            print("movie: post_id = {}".format(post_id))
             last_post_id  = get_latest_postid(post_id, conf["web_url"][0])
 
             conf["post_id"] = last_post_id

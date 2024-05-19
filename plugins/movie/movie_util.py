@@ -103,19 +103,6 @@ def get_source_link(url):
     except:
         print(traceback.format_exc())
     return "", title_text
-def get_latest_postid(last_post_id, web_url):
-    rets = {}
-    html_page=download(web_url)
-    ret_page=_extract_movie_info(html_page)
-    rets.update(ret_page)
-
-    max_post_id = -1
-    for key in rets:
-        href = rets[key]
-        cur_id = int(href.split("/")[-1].split(".")[0])
-        if cur_id > max_post_id:
-            max_post_id = cur_id
-    return max_post_id
 
 def get_latest_postid(last_post_id, web_url):
     rets = {}
