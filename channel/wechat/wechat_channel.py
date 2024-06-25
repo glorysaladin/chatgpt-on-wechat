@@ -109,7 +109,7 @@ class WechatChannel(ChatChannel):
 
     def __init__(self):
         super().__init__()
-        self.receivedMsgs = ExpiredDict(60 * 60)
+        self.receivedMsgs = ExpiredDict(conf().get("expires_in_seconds"))
         self.auto_login_times = 0
 
     def startup(self):
@@ -132,7 +132,7 @@ class WechatChannel(ChatChannel):
             # start message listener
             itchat.run()
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
 
     def exitCallback(self):
         try:
