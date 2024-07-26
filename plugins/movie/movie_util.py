@@ -272,10 +272,6 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
         return False, ["未找到资源, 可尝试缩短关键词, 只保留资源名, 不要带'第几部第几集谢谢'，等无关词."]
 
     num = len(rets)
-    if not is_pay_user:
-       rets = rets[0:5]
-    else:
-       rets = rets[0:20]
     rets.insert(0, "[{}]找到 {} 个相关资源:\n".format(source, num))
 
     return True, rets
