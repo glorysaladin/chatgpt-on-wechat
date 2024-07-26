@@ -3,8 +3,6 @@ import sys, re, os, time, json, re
 from datetime import datetime
 import html5lib
 from bs4 import BeautifulSoup
-import logging
-import logging.handlers
 import traceback
 import urllib
 import requests
@@ -201,11 +199,24 @@ def good_match(s1, s2):
 def get_from_affdz(web_url, moviename, show_link=False):
     rets = []
     try:
+        #print(f"start affdz {web_url} {moviename}")
         url="{}/search.php?q={}".format(web_url, moviename)
         proxies = {"http":None, "https":None}
-        resp = requests.get(url, headers=headers, proxies=proxies)
-        httpDoc = resp.text
+        i = 0 
+        httpDoc=""
+        while i < 3:
+            print(f"try {i} times.")
+            try:
+                resp = requests.get(url, headers=headers, proxies=proxies, timeout=(5,5))
+                httpDoc = resp.text
+                resp.close()
+                break
+            except requests.exceptions.RequestException as e:
+                i+=1
+                print("get from affdz error", e)
+
         soup = None
+        #print(f"start affdz2 {web_url} {moviename}")
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
         except:
@@ -233,12 +244,14 @@ def get_from_affdz(web_url, moviename, show_link=False):
                  rets.append("{}\n{}".format(title, link))
     except:
         print("error=",traceback.format_exc())
+    #print(f"start affdz3 {web_url} {moviename}")
     return rets
 
 def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_affdz, pattern='json'):
     source = ''
     rets = []
     for idx, web_url in enumerate(web_url_list):
+        print(f"{idx} {web_url}")
         rets.extend(get_from_affdz(web_url, moviename, show_link))
         if len(rets) > 0:
             source = source + str(idx)
@@ -268,6 +281,7 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
     return True, rets
 
 def search_movie(web_url_list, movie, show_link=False, is_pay_user=False, only_affdz=False):
+    print("start")
     return _get_search_result(web_url_list, movie, show_link, is_pay_user, only_affdz)
 
 def need_update(my_count, other_count):
@@ -317,6 +331,7 @@ def send_update_to_group(movie_update_data, web_url, show_link):
                         update_movies.append(movie_name)
                         movie_update_data[movie_name] = version
     msg_ret = []
+    print(update_movies)
     for movie in update_movies:
         link = ""
         if movie in movie_source_map and "http" in movie_source_map[movie]:
@@ -384,11 +399,13 @@ def check_update():
 
 #movie_version="/home/lighthouse/project/chatgpt-on-wechat2/plugins/movie/movie_update_version.pkl"
 #movie_update_data={}
+#movie_update_data={'你好星期六': '5.26', '声生不息家年华': '02.18', '与恶魔有约': '16集', '我们的美好生活': '1.20', '爱的修学旅行': '02.07', '花儿与少年': '02.07', '天官赐福2': '12集', '我可以47': '12.27', '请和我的老公结婚': '16集', '你也有今天': '36集', '宋慈韶华录': '25集', '我们的翻译官': '36集', '大江大河之岁月如歌': '33集', '黑土无言': '12', '如果奔跑是我的人生': '28集', '19层': '30集', '名侦探学院': '02.17', '遮天': '59集', '祈今朝': '36集', '仙剑四': '36集', '要久久爱': '32集', '小城故事多': '30集', '杀人者的购物中心': '08集', '乌有之地': '1.26', '好久没做': '06集', '狗剩快跑': '24集', '空战群英': '08集', '大王饶命': '12集', '吞噬星空': '121集', '赵本山小品合集': '2.11', '欢乐喜剧人小品合集': '1.28', '黄宏、潘长江小品合集': '1.28', '冯巩、郭冬临相声小品合集': '1.28', '赵丽蓉小品合集': '1.28', '陈佩斯、朱时茂小品合集': '1.28', '郭德纲相声': '1.28', '春节联欢晚会相声小品合集': '1.28', '历年春晚小品相声合集216集': '2.11', '50部春晚小品大全': '2.11', '金瓶梅原著【全彩插图】【未删减】': '1.28', '800本连环画儿时记忆3': '1.28', '800本连环画儿时记忆2': '1.28', '800本连环画儿时记忆1': '1.28', '四大名著 连环画': '1.28', '金庸小说漫画': '1.28', '伊藤润二合集': '1.28', '聊斋故事连环画': '1.28', '高清怀旧连环画': '1.28', '金瓶梅（全彩连环画版）绝版彩色国画经典珍藏': '1.28', '网易云评论最多的中文歌曲TOP50': '1.28', '网易云评论最多的粤语歌曲TOP100': '1.28', '网易云评论最多的英文TOP100': '1.28', '网易云评论最多的日语TOP100': '1.28', '网易云评论最多的韩语歌曲TOP200': '1.28', '网易云评论最多的纯音乐TOP100': '1.28', '全网顶级AI绘画极品美女': '1.28', '19x电影合集70部': '1.28', '豆瓣评分Top20': '1.28', '韩国最出色的R限制【合集】': '1.28', '影迷投票选出了近十年他们最喜欢的50部恐怖片！': '1.28', '人人影视电影合集--高清双语字幕（珍藏版）': '1.28', '宫崎骏作品合集': '1.28', '皮克斯动画合集': '1.28', '经典香港电影合集（修复未删减版本）': '1.28', '迪士尼系列动画139部蓝光珍藏版': '1.28', '周星驰系列': '1.28', 'DC电影宇宙系列': '1.28', '漫威电影宇宙(MCU)系列': '1.28', '一百年一百部 美国电影学院百年百部影片': '1.28', '2023奥斯卡提名电影合集(95届)': '1.28', '奥斯卡获奖影片1988-2022': '1.28', '豆瓣电影Top250': '1.28', '欢乐家长群': '40集', '阿麦从军': '36集', '暴雪时分': '06集', '在暴雪时分': '30集', '尘封十三载': '24集', '授她以柄': '20集', '少爷和我': '12集', '斗破苍穹年番': '95集', '独一无二的她': '24 集', '2024湖南卫视春节联欢晚会': '2.5', '同心向未来·2024中国网络视听年度盛典': '2.5', '世界各地的性与爱  (2018) 中文字幕': '2.5', '台湾食堂三季': '2.5', '世界各地的性与爱': '2.5', '大唐狄公案': '32集', '南来北往': '39集', '黑白潜行': '2.7', '爱爱内含光(台剧)': '8集', '甜甜的陷阱': '24集', '历届春晚小品相声': '2.11', '仙逆': '38集', '飞驰人生': '2.13', '如懿传': '87集', '烟火人间': '18集', 'xianh\u2006xun\u2006ai\u2006qing': 'None', '乡村爱情16': '40集', '动物园里有什么': '2.16', '缉恶': '2.16', '大侦探第九季': '5.08', '全员加速中': '4.18', '烟火人家': '41集', '金手指': '2.2', '大理寺少卿游': '36集', '春日浓情  14集': 'None', '师兄啊师兄 24集': 'None', '冰火魔厨': '138集', '春日浓情': '17集', '师兄啊师兄': '26集', '猎冰': '18集', '大理寺少卿': '12集', '南来北往2': '39集', '怒潮': '2.22', '种地吧第二季': '2.23', '暮色心迹': '24集', '明星大侦探第九季': '3.02', '炙爱之战': '2.14', '猎冰2': '09集', '行尸走肉：存活之人': '06集', '我想和你唱第5季': '2.24', '你的岛屿已抵达': '12集', '犯罪现场4': '10集', '房东在上': '98集', '大王别慌张': '14集', '大主宰': '50集', '半熟恋人3': '5.02', '无限超越班2': '5.11', '乐可广播剧': '2.28', '婚后事': '14集', '江河日上': '24集', '幕府将军': '10集', '唐人街探案2剧版': '03集', '光环第二季': '07集', '东京罪恶2': '05集', '周处除三害': '3.1', '金字塔游戏': '06集', '大理寺 少卿游': '22', '飞驰人生热爱篇': '10集', '别对我动心': '18集', '唐人街探案2': '16集', '种地吧2024': '4.28', '葬送的芙莉莲': '28集', '仙武帝尊': '78集', '永安梦': '24集', '破墓': '4.23', '近战法师': '20集', '紫川·光明三杰': '24集', '一梦浮生': '22集', '眼泪女王': '16集', '潜行 刘德华 2023': '3.14', '烈焰': '40集', '宣武门': '41集', '今晚开放麦第2季': '3.13', '花间令': '32集', '谢谢你温暖我': '15集', '与凤行': '39集', '小日子': '27集', '执笔': '24集', '追风者': '38集', '欢乐颂5': '34集', '遥不可及的爱': '3.36', '乘风踏浪': '2024集', '今天的她们': '24集', '百炼成神': '78集', '步步倾心': '28集', '猜猜我是谁': '24集', '我独自升级': '12集', '惜花芷': '2024', '不够善良的我们': '08集', '红衣醉': '26集', '盒子里的猫': '5.26', '手术直播间': '28集', '海贼王': '1103集', '诛仙2024': '37集', '哈哈哈哈哈4': '5.26', '小谢尔顿第7季': '06集', '又见逍遥': '40集', '难寻': '28集', '恋爱兄妹': '16集', '公寓404': '08集', '七人的复活': '16集', '美好世界': '14集', '逆天奇案2': '30集', '承欢记': '2024', '城中之城': '40集', '春色寄情人': '21集', '背着善宰跑': '16集', '西行纪5': '36集', '西行纪合集': '4.26', '鉴罪女法医之魇始': '24集', '爱在天摇地': '24集', '爱在天摇地动时': '24集', '种地吧2': '5.25', '情靡': '92集', '炼气3000层开局收女帝为徒': '78集', '微暗之火': '28集', '我什么时候无敌了': '94集', '亲爱的宋小姐': '69集', '乌龙孕事': '76集', '游子归家': '88集', '总裁夫人为何那样': '79集', '新生': '10集', '我的阿勒泰': '08集', '此刻无声': '20集', '哈尔滨一九四四': '40集', '不可告人': '1080', '庆余年第二季': '31集', '家族荣耀之继承者': '1080'}
 #print(send_update_to_group(movie_update_data, "https://moviespace02.com", True))
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(get_latest_postid(1500, "https://affdz.com"))
 #print(movie_update_data)
-#print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "如懿传", True, False, False))
+#print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "仙逆", True, False, False))
+#print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "莲花楼", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
