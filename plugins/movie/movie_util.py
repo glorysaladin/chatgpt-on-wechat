@@ -78,8 +78,17 @@ def get_source_link(url):
     title_text = ""
     try:
         proxies = {"http":None, "https":None}
-        resp = requests.get(url, headers=headers, proxies=proxies, timeout=3)
-        httpDoc = resp.text
+        i = 0
+        httpDoc=""
+        while i < 3:
+            try:
+                resp = requests.get(url, headers=headers, proxies=proxies, timeout=10)
+                httpDoc = resp.text
+                resp.close()
+                break
+            except:
+                i+=1
+
         soup = None
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
@@ -207,7 +216,7 @@ def get_from_affdz(web_url, moviename, show_link=False):
         while i < 3:
             print(f"try {i} times.")
             try:
-                resp = requests.get(url, headers=headers, proxies=proxies, timeout=(5,5))
+                resp = requests.get(url, headers=headers, proxies=proxies, timeout=(10,10))
                 httpDoc = resp.text
                 resp.close()
                 break
@@ -259,12 +268,12 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
 
     if not only_affdz:
         if len(rets) == 0:
-            rets.extend(get_from_funletu(moviename))
+            rets.extend(get_from_uukk(moviename, is_pay_user))
             if len(rets) > 0:
                 source += "2"
 
         if len(rets) == 0:
-            rets.extend(get_from_uukk(moviename, is_pay_user))
+            rets.extend(get_from_funletu(moviename))
             if len(rets) > 0:
                 source += "3"
 
