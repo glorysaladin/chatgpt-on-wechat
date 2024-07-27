@@ -103,7 +103,7 @@ class Movie(Plugin):
             msg = get_random_movie(1, post_id, 10, weburl[0], conf["show_movie_link"])
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
-            reply.content = f"{msg} \n\n ❤️以 '@我 找莲花楼' 的方式搜索任意资源链接"
+            reply.content = f"{msg} \n\n 发送资源名搜索任意资源"
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS
             return
@@ -321,6 +321,7 @@ class Movie(Plugin):
         weburl= self.conf["web_url"]
         show_link = self.conf["show_movie_link"]
         logger.debug("weburl={}".format(weburl))
+        only_affdz=False
         ret, movie_results = search_movie(weburl, moviename, show_link, self.userInfo['ispayuser'], only_affdz)
 
         # 大家都在找

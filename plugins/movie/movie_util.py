@@ -260,7 +260,6 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
     source = ''
     rets = []
     for idx, web_url in enumerate(web_url_list):
-        print(f"{idx} {web_url}")
         rets.extend(get_from_affdz(web_url, moviename, show_link))
         if len(rets) > 0:
             source = source + str(idx)
@@ -286,7 +285,6 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
     return True, rets
 
 def search_movie(web_url_list, movie, show_link=False, is_pay_user=False, only_affdz=False):
-    print("start")
     return _get_search_result(web_url_list, movie, show_link, is_pay_user, only_affdz)
 
 def need_update(my_count, other_count):
