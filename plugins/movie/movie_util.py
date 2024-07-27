@@ -28,7 +28,7 @@ session.mount('https://', HTTPAdapter(max_retries=3))
 
 def download(url):
     proxies = {"http":None, "https":None}
-    resp = requests.get(url, headers=headers, proxies=proxies)
+    resp = requests.get(url, headers=headers, proxies=proxies, timeout=10)
     return resp.text
 
 
@@ -84,18 +84,8 @@ def _extract_movie_info(httpDoc, pattern='json'):
 def get_source_link(url):
     title_text = ""
     try:
-        proxies = {"http":None, "https":None}
         i = 0
-        httpDoc=""
-        while i < 3:
-            try:
-                resp = requests.get(url, headers=headers, proxies=proxies, timeout=10)
-                httpDoc = resp.text
-                resp.close()
-                break
-            except:
-                i+=1
-
+        httpDoc = session.get(url, timeout=10).content.decode()
         soup = None
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
@@ -217,22 +207,10 @@ def get_from_affdz(web_url, moviename, show_link=False):
     try:
         #print(f"start affdz {web_url} {moviename}")
         url="{}/search.php?q={}".format(web_url, moviename)
-        proxies = {"http":None, "https":None}
         i = 0 
         httpDoc=""
         httpDoc = session.get(url, timeout=10).content.decode()
         #print("resp=", resp)
-
-        #while i < 3:
-        #    print(f"try {i} times.")
-        #    try:
-        #        resp = requests.get(url, headers=headers, proxies=proxies, timeout=(10,10))
-        #        httpDoc = resp.text
-        #        resp.close()
-        #        break
-        #    except requests.exceptions.RequestException as e:
-        #        i+=1
-        #        print("get from affdz error", e)
 
         soup = None
         #print(f"start affdz2 {web_url} {moviename}")
@@ -417,7 +395,7 @@ def check_update():
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(get_latest_postid(1500, "https://affdz.com"))
 #print(movie_update_data)
-#print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
+print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace01.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "莲花楼", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
