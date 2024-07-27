@@ -17,7 +17,14 @@ from get_pan_from_uukk import *
 from get_movie_from_soupian import *
 from get_movie_from_zhuiyingmao import *
 
-headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.41"}
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+
+
+from requests.adapters import HTTPAdapter
+
+session = requests.Session()
+session.mount('http://', HTTPAdapter(max_retries=3))
+session.mount('https://', HTTPAdapter(max_retries=3))
 
 def download(url):
     proxies = {"http":None, "https":None}
@@ -213,16 +220,19 @@ def get_from_affdz(web_url, moviename, show_link=False):
         proxies = {"http":None, "https":None}
         i = 0 
         httpDoc=""
-        while i < 3:
-            print(f"try {i} times.")
-            try:
-                resp = requests.get(url, headers=headers, proxies=proxies, timeout=(10,10))
-                httpDoc = resp.text
-                resp.close()
-                break
-            except requests.exceptions.RequestException as e:
-                i+=1
-                print("get from affdz error", e)
+        httpDoc = session.get(url, timeout=10).content.decode()
+        #print("resp=", resp)
+
+        #while i < 3:
+        #    print(f"try {i} times.")
+        #    try:
+        #        resp = requests.get(url, headers=headers, proxies=proxies, timeout=(10,10))
+        #        httpDoc = resp.text
+        #        resp.close()
+        #        break
+        #    except requests.exceptions.RequestException as e:
+        #        i+=1
+        #        print("get from affdz error", e)
 
         soup = None
         #print(f"start affdz2 {web_url} {moviename}")
@@ -407,7 +417,8 @@ def check_update():
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(get_latest_postid(1500, "https://affdz.com"))
 #print(movie_update_data)
-#print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "仙逆", True, False, False))
+#print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
+#print(search_movie(["https://moviespace01.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "莲花楼", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
 #if __name__ == "__main__":
