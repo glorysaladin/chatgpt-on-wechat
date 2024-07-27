@@ -395,7 +395,7 @@ def check_update():
 #print(send_update_to_group(movie_update_data, "https://affdz.com"))
 #print(get_latest_postid(1500, "https://affdz.com"))
 #print(movie_update_data)
-print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
+#print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace01.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "莲花楼", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
