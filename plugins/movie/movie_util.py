@@ -254,7 +254,7 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
         for i in range(0, len(moviename) - sub_len + 1):
             if len(rets) > 0:
                 break
-            sub_moviename = moviename[i:sub_len]
+            sub_moviename = moviename[i:i+sub_len]
             print(moviename, sub_moviename)
             for idx, web_url in enumerate(web_url_list):
                 rets.extend(get_from_affdz(web_url, sub_moviename, show_link))
