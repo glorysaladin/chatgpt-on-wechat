@@ -17,7 +17,7 @@ from get_pan_from_uukk import *
 from get_movie_from_soupian import *
 from get_movie_from_zhuiyingmao import *
 
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3', 'Connection': 'close'}
 
 
 from requests.adapters import HTTPAdapter
@@ -25,6 +25,7 @@ from requests.adapters import HTTPAdapter
 session = requests.Session()
 session.mount('http://', HTTPAdapter(max_retries=3))
 session.mount('https://', HTTPAdapter(max_retries=3))
+session.keep_alive = False
 
 def download(url):
     proxies = {"http":None, "https":None}
@@ -85,7 +86,7 @@ def get_source_link(url):
     title_text = ""
     try:
         i = 0
-        httpDoc = session.get(url, timeout=10).content.decode()
+        httpDoc = session.get(url, headers=headers, verify=True, timeout=10).content.decode()
         soup = None
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
@@ -208,7 +209,7 @@ def get_from_affdz(web_url, moviename, show_link=False):
         #print(f"start affdz {web_url} {moviename}")
         url="{}/search.php?q={}".format(web_url, moviename)
         i = 0 
-        httpDoc = session.get(url, timeout=10).content.decode()
+        httpDoc = session.get(url, headers=headers, verify=True, timeout=10).content.decode()
         soup = None
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
