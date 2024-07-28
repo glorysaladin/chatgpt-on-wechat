@@ -208,12 +208,8 @@ def get_from_affdz(web_url, moviename, show_link=False):
         #print(f"start affdz {web_url} {moviename}")
         url="{}/search.php?q={}".format(web_url, moviename)
         i = 0 
-        httpDoc=""
         httpDoc = session.get(url, timeout=10).content.decode()
-        #print("resp=", resp)
-
         soup = None
-        #print(f"start affdz2 {web_url} {moviename}")
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
         except:
@@ -241,7 +237,6 @@ def get_from_affdz(web_url, moviename, show_link=False):
                  rets.append("{}\n{}".format(title, link))
     except:
         print("error=",traceback.format_exc())
-    #print(f"start affdz3 {web_url} {moviename}")
     return rets
 
 def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_affdz, pattern='json'):
@@ -252,6 +247,19 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
         if len(rets) > 0:
             source = source + str(idx)
             break
+
+    if len(rets) == 0:
+        sub_len = 3
+        for i in range(0, len(moviename) - sub_len + 1):
+            if len(rets) > 0:
+                break
+            sub_moviename = moviename[i:sub_len]
+            print(moviename, sub_moviename)
+            for idx, web_url in enumerate(web_url_list):
+                rets.extend(get_from_affdz(web_url, sub_moviename, show_link))
+                if len(rets) > 0:
+                    source = source + str(idx)
+                    break
 
     if not only_affdz:
         if len(rets) == 0:
@@ -273,7 +281,8 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
     return True, rets
 
 def search_movie(web_url_list, movie, show_link=False, is_pay_user=False, only_affdz=False):
-    return _get_search_result(web_url_list, movie, show_link, is_pay_user, only_affdz)
+    ret = _get_search_result(web_url_list, movie, show_link, is_pay_user, only_affdz)
+    return ret
 
 def need_update(my_count, other_count):
     try:
@@ -397,7 +406,7 @@ def check_update():
 #print(movie_update_data)
 #print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace01.com"], "仙逆", True, False, False))
-#print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "莲花楼", True, False, False))
+#print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "攻略三年半系统说我搞错对象", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
