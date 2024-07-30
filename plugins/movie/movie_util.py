@@ -7,7 +7,7 @@ import traceback
 import urllib
 import requests
 import random
-os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com,moviespace02.com'
+os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com,moviespace02.com,www.moviespace01.com,www.moviespace02.com,www.affdz.com'
 
 cur_dir=os.path.dirname(__file__)
 sys.path.append(cur_dir)
@@ -86,7 +86,7 @@ def get_source_link(url):
     title_text = ""
     try:
         i = 0
-        httpDoc = session.get(url, headers=headers, verify=True, timeout=10).content.decode()
+        httpDoc = session.get(url, headers=headers, verify=False, timeout=10).content.decode()
         soup = None
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
@@ -209,7 +209,7 @@ def get_from_affdz(web_url, moviename, show_link=False):
         #print(f"start affdz {web_url} {moviename}")
         url="{}/search.php?q={}".format(web_url, moviename)
         i = 0 
-        httpDoc = session.get(url, headers=headers, verify=True, timeout=10).content.decode()
+        httpDoc = session.get(url, headers=headers, verify=False, timeout=10).content.decode()
         soup = None
         try:
             soup = BeautifulSoup(httpDoc, 'html5lib')
@@ -407,7 +407,7 @@ def check_update():
 #print(movie_update_data)
 #print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace01.com"], "仙逆", True, False, False))
-#print(search_movie(["https://moviespace02.com", "https://moviespace01.com"], "攻略三年半系统说我搞错对象", True, False, False))
+#print(search_movie(["https://www.moviespace02.com", "https://www.moviespace01.com"], "攻略三年半系统说我搞错对象", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
