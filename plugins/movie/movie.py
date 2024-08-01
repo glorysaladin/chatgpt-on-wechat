@@ -733,7 +733,10 @@ class Movie(Plugin):
         movie_name = content.replace("删除推荐资源", "")
 
         try:
-            del favorite_movie_datas[movie_name]
+            if "all" in movie_name or "ALL" in movie_name:
+                favorite_movie_datas.clear()
+            else:
+                del favorite_movie_datas[movie_name]
             write_pickle(self.favorite_movie_path, favorite_movie_datas)
         except:
             pass

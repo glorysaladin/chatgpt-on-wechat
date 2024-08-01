@@ -21,6 +21,7 @@ headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 
 
 from requests.adapters import HTTPAdapter
+requests.packages.urllib3.disable_warnings()
 
 session = requests.Session()
 session.mount('http://', HTTPAdapter(max_retries=3))
