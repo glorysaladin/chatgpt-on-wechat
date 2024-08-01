@@ -285,7 +285,7 @@ class Movie(Plugin):
                 
         conf = super().load_config()
         only_affdz = True
-        if (content.startswith("找") or "找" in content or self.is_whitelist_movie(content)) and not conf["only_affdz"]:
+        if (content.startswith("找") or "找" in content) and not conf["only_affdz"]:
             only_affdz = False
 
         isgroup = context.get("isgroup", False)
