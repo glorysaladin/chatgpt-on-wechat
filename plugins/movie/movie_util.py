@@ -245,7 +245,7 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
     source = ''
     rets = []
     for idx, web_url in enumerate(web_url_list):
-        rets.extend(get_from_affdz(web_url, moviename, show_link))
+        rets.extend(get_from_affdz(web_url, moviename, true))
         if len(rets) > 0:
             source = source + str(idx)
             break
@@ -285,6 +285,68 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
 def search_movie(web_url_list, movie, show_link=False, is_pay_user=False, only_affdz=False):
     ret = _get_search_result(web_url_list, movie, show_link, is_pay_user, only_affdz)
     return ret
+
+import wget
+def download_duanju_file(duanju_url, duanju_local_path):
+    #url="http://101.43.54.135:6800/xhs_auto_post/xhs_list.txt"
+    if os.path.exists(duanju_local_path):
+        os.remove(duanju_local_path)
+    wget.download(duanju_url, duanju_local_path)
+
+def file_diff(duanju_local_path_tmp, duanju_local_path):
+    tmp_movienames = []
+
+    with open(duanju_local_path_tmp, "r") as f:
+        line = f.readline()
+        while line:
+            tmp_movienames.append(line.strip())
+            line = f.readline()
+
+    movienames = []
+    if os.path.exists(duanju_local_path):
+        with open(duanju_local_path, "r") as f:
+            line = f.readline()
+            while line:
+                movienames.append(line.strip())
+                line = f.readline()
+ 
+    if sorted(tmp_movienames) == sorted(movienames):
+        return []
+     
+    with open(duanju_local_path, "w") as f:
+        for moviename in tmp_movienames:
+            f.write(moviename + "\n")
+    return tmp_movienames
+
+def get_duanju(web_url_list, duanju_url):
+    duanju_local_path_tmp=os.path.join(cur_dir, "./duanju_tmp.txt")
+    duanju_local_path=os.path.join(cur_dir, "./duanju.txt")
+    download_duanju_file(duanju_url, duanju_local_path_tmp)
+    movienames = file_diff(duanju_local_path_tmp, duanju_local_path)
+    if len(movienames) == "":
+        return ""
+    rets = []
+    for moviename in movienames:
+        for idx, web_url in enumerate(web_url_list):
+            rets.extend(get_from_affdz(web_url, moviename, True))
+            if len(rets) > 0:
+                break
+
+        if len(rets) == 0:
+            sub_len = 3
+            for i in range(0, len(moviename) - sub_len + 1):
+                if len(rets) > 0:
+                    break
+                sub_moviename = moviename[i:i+sub_len]
+                print(moviename, sub_moviename)
+                for idx, web_url in enumerate(web_url_list):
+                    rets.extend(get_from_affdz(web_url, sub_moviename, True))
+                    if len(rets) > 0:
+                        break
+    if len(rets) > 0:
+        rets.insert(0, "热门资源推荐\n")
+        return "\n".join(rets)
+    return ""
 
 def need_update(my_count, other_count):
     try:
@@ -410,5 +472,6 @@ def check_update():
 #print(search_movie(["https://moviespace01.com"], "仙逆", True, False, False))
 #print(search_movie(["https://www.moviespace02.com", "https://www.moviespace01.com"], "攻略三年半系统说我搞错对象", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
+#print(get_duanju(["https://www.moviespace02.com", "https://www.moviespace01.com"],  "http://101.43.54.135:6800/moviespace01/duanju.txt"))
 #if __name__ == "__main__":
 #    print(search_movie("https://affdz.com", "天官赐福第二季"))
