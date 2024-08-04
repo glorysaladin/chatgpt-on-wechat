@@ -245,7 +245,7 @@ def _get_search_result(web_url_list, moviename, show_link, is_pay_user, only_aff
     source = ''
     rets = []
     for idx, web_url in enumerate(web_url_list):
-        rets.extend(get_from_affdz(web_url, moviename, true))
+        rets.extend(get_from_affdz(web_url, moviename, show_link))
         if len(rets) > 0:
             source = source + str(idx)
             break
