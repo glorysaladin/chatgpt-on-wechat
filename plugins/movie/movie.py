@@ -261,6 +261,15 @@ class Movie(Plugin):
             e_context.action = EventAction.BREAK_PASS
             return
 
+        if content.strip().startswith("热门短剧"):
+            hot_duanju = self.get_hot_duanju()
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = hot_duanju 
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
         if context.type == ContextType.MONEY:
             self.recharge_with_money(e_context)
             self.send_money_msg(e_context)
@@ -709,6 +718,16 @@ class Movie(Plugin):
             rets.append("暂无推荐资源")
         return "\n".join(rets)
 
+    def get_hot_duanju(self):
+        duanju_url= self.conf["duanju_url"]
+        weburl= self.conf["web_url"]
+        print(duanju_url, weburl)
+        rets = get_duanju(weburl, duanju_url)
+        if len(rets) > 0:
+            return rets
+        else:
+            return ""
+
     def add_favorite_movie(self, e_context: EventContext):
         favorite_movie_datas = {}
         if os.path.exists(self.favorite_movie_path):
@@ -777,4 +796,6 @@ class Movie(Plugin):
         help_text += "输入 '添加推荐资源+资源名'，加入推荐资源列表\n"
         help_text += "输入 '删除推荐资源+资源名'，从推荐资源列表删除\n"
         help_text += "输入 '所有推荐资源'，获取所有推荐列表\n"
+        help_text += "输入 '热门短剧'，获取所有推荐列表\n"
+
         return help_text
