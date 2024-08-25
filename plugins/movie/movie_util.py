@@ -344,7 +344,7 @@ def get_duanju(web_url_list, duanju_url):
                     if len(rets) > 0:
                         break
     if len(rets) > 0:
-        rets.insert(0, "热门资源推荐\n")
+        rets.insert(0, "🔥🔥热门资源推荐🔥🔥\n")
         return "\n".join(rets)
     return ""
 
