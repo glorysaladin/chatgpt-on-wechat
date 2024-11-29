@@ -82,7 +82,7 @@ class Introduce(Plugin):
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS
 
-        if  content.startswith("我是") or content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
+        if  content.startswith("I'm") or (self.conf["accept_friend_msg"] and e_context["context"].type == ContextType.ACCEPT_FRIEND):
             if self.conf["open_movie_search"]:
                 self.send_favorite_movie(e_context)
 
