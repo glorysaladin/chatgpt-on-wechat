@@ -7,6 +7,7 @@ import plugins
 from bridge.reply import Reply, ReplyType
 from plugins import *
 from .movie_util import *
+from .get_docker_update import *
 import traceback
 from common.log import logger
 from .util import *
@@ -131,6 +132,30 @@ class Movie(Plugin):
             reply = Reply()  # 创建回复消息对象
             reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
             reply.content = f"{update_msg}"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content == "自动群发更新":
+            conf = super().load_config()
+            logger.debug("Start auto update movie.")
+            auto_update_msg = get_auto_update(conf["web_url"][0], conf["quark_auto_save_image"])
+            logger.debug("finish auto update movie.")
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"{auto_update_msg}"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        if content == "自动检查失效":
+            conf = super().load_config()
+            logger.debug("Start auto update movie cancel check.")
+            auto_update_msg = get_update_cancel(conf["quark_auto_save_image"], conf["quark_auto_save_url"])
+            logger.debug("finish auto update movie cancel check.")
+            reply = Reply()  # 创建回复消息对象
+            reply.type = ReplyType.TEXT  # 设置回复消息的类型为文本
+            reply.content = f"{auto_update_msg}"
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS
             return
@@ -782,6 +807,8 @@ class Movie(Plugin):
         help_text += "输入 '更新最大资源'， 获取网站最大的资源ID\n"
         help_text += "输入 '检查更新'， 获检查关注的资源是不是有更新\n"
         help_text += "输入 '群发更新'， 获更新之后的资源发送给指定的群\n"
+        help_text += "输入 '自动群发更新'， 获更新之后的资源自动发送给指定的群\n"
+        help_text += "输入 '自动检查失效'， 获更新之后的资源检查是否失效\n"
         help_text += "输入 '找三体'， 将获取三体资源\n"
         help_text += "输入 '加入资源白名单+资源名'， 将资源加入到白名单中\n"
         help_text += "输入 '群发广告+广告ID'，群发广告信息\n"

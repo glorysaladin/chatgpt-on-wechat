@@ -38,7 +38,6 @@ def search(query, url):
             except:
                 print("ret_val=", ret_val)
                 print(traceback.format_exc())
-            print(js)
 
             for item in js["list"]:
                 question=item['question']
