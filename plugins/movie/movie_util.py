@@ -344,7 +344,7 @@ def get_duanju(web_url_list, duanju_url):
                     if len(rets) > 0:
                         break
     if len(rets) > 0:
-        rets.insert(0, "热门资源推荐\n")
+        rets.insert(0, "🔥🔥热门资源推荐🔥🔥\n")
         return "\n".join(rets)
     return ""
 
@@ -434,9 +434,9 @@ def check_update():
     print("movie_series={}".format(movie_series))
     for moviename, my_count, source in movie_series:
         rets = []
-        fuletu_rets = get_from_funletu(moviename)
+        #fuletu_rets = get_from_funletu(moviename)
         #print("query=", moviename, "fuletu_rets=", fuletu_rets)
-        rets.extend(fuletu_rets)
+        #rets.extend(fuletu_rets)
         uukk_rets = get_from_uukk(moviename, True)
         rets.extend(uukk_rets)
         for ret in rets:

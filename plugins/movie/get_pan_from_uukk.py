@@ -12,7 +12,8 @@ def good_match(s1, s2):
 
 COOKIE="Hm_lvt_cce07f87930c14786d9eced9c08d0e89=1714149361,1715772698; Hm_lvt_0f5b4479829961ae8a3cb0e80ec93808=1720437132,1720530560,1720695559,1720963126; __51cke__=; __tins__21897559=%7B%22sid%22%3A%201721580186807%2C%20%22vd%22%3A%203%2C%20%22expires%22%3A%201721582100028%7D; __51laig__=19"
 #URLS=["http://22006.cn/v/api/getJuzi", "http://22006.cn/v/api/getDyfx", "http://22006.cn/v/api/getTTZJB"]
-URLS=["http://uukk6.cn/v/api/getJuzi", "http://uukk6.cn/v/api/getDyfx", "http://uukk6.cn/v/api/getTTZJB"]
+#URLS=["http://uukk6.cn/v/api/getJuzi", "http://uukk6.cn/v/api/getDyfx", "http://uukk6.cn/v/api/getTTZJB"]
+URLS=["http://www.kkkob.com/v/api/search", "http://www.kkkob.com/v/api/getDJ","http://www.kkkob.com/v/api/getJuzi","http://www.kkkob.com/v/api/getXiaoyu"]
 
 def get_from_uukk(query, is_pay_user):
     rets = []
@@ -56,4 +57,4 @@ def search(query, url):
         print(traceback.format_exc())
     return rets
 
-#print(get_from_uukk("梦想城", True))
+#print(get_from_uukk("庆余年", True))
