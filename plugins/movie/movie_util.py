@@ -7,7 +7,7 @@ import traceback
 import urllib
 import requests
 import random
-os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com,moviespace02.com,www.moviespace01.com,www.moviespace02.com,www.affdz.com,www.moviespace02.online,moviespace02.online'
+os.environ['NO_PROXY'] = 'affdz.com,moviespace01.com,moviespace02.com,www.moviespace01.com,www.moviespace02.com,www.affdz.com,www.moviespace02.online,moviespace02.online,www.20241230.online,20241230.online'
 
 cur_dir=os.path.dirname(__file__)
 sys.path.append(cur_dir)
@@ -207,7 +207,7 @@ def good_match(s1, s2):
 def get_from_affdz(web_url, moviename, show_link=False):
     rets = []
     try:
-        #print(f"start affdz {web_url} {moviename}")
+        print(f"start affdz {web_url} {moviename}")
         url="{}/search.php?q={}".format(web_url, moviename)
         i = 0 
         httpDoc = session.get(url, headers=headers, verify=False, timeout=10).content.decode()
@@ -221,6 +221,7 @@ def get_from_affdz(web_url, moviename, show_link=False):
         listNode = bodyNode.find('div', attrs={"class":"sou-con-list"})
         aNodes = listNode.find_all('a')
         source=""
+        print("time")
         for item in aNodes:
             href = ""
             title = ""
@@ -229,6 +230,7 @@ def get_from_affdz(web_url, moviename, show_link=False):
                  if "post" not in href:
                      continue
                  title = item['title'].replace("<strong>", "").replace("</strong>", "")
+                 print("title={}".format(title))
             if good_match(moviename, title):
                  movieurl = href
                  link, title_text = get_source_link(href)
@@ -237,6 +239,7 @@ def get_from_affdz(web_url, moviename, show_link=False):
                  if not show_link:
                      link = " "
                  rets.append("{}\n{}".format(title, link))
+                 print("rets={}".format(rets))
     except:
         print("error=",traceback.format_exc())
     return rets
@@ -471,6 +474,8 @@ def check_update():
 #print(search_movie(["https://moviespace02.com"], "仙逆", True, False, False))
 #print(search_movie(["https://moviespace01.com"], "仙逆", True, False, False))
 #print(search_movie(["https://www.moviespace02.online", "https://www.affdz.com"], "攻略三年半系统说我搞错对象", True, False, False))
+#print(search_movie(["https://www.affdz.com"], "攻略三年半系统说我搞错对象", True, False, False))
+#print(search_movie(["https://20241230.online"], "攻略三年半系统说我搞错对象", True, False, False))
 #print(get_latest_postid(1, "https://moviespace02.com"))
 #print(get_duanju(["https://www.moviespace02.com", "https://www.moviespace01.com"],  "http://101.43.54.135:6800/moviespace01/duanju.txt"))
 #if __name__ == "__main__":
